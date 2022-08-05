@@ -72,23 +72,23 @@ not in the list
 not a list but a lumpy space princess fan page
 this is not a list
 
-  - new list
-  -just dropped
-    - soup
+- new list
+-just dropped
+  - soup
 decent
 ; that too
-    - pretty soup
+  - pretty soup
   - ugly soup
 
 It is revealed in "Skyhooks II" that Lumpy Space Princess is the most powerful of the Elementals, a group of beings who embody the cosmic forces that make up Ooo. <br> As the Elemental of Lumps, she can negate the powers of other Elementals and reverse the damage they cause, should they ever go rogue.
 
 *horrible list test, or, how to break your parser*
 
-    - level 4
-  - level 2
-   - level 3
-- level 1
-       - level 5
+- level 0
+   - level 1
+   - level 1
+- level 0
+   - level 1
 
 
 ##### Ordered list
@@ -98,6 +98,25 @@ It is revealed in "Skyhooks II" that Lumpy Space Princess is the most powerful o
    1. d - lvl2 
    2. e - lvl2
 30. f - lvl3
+
+
+- level 0
+- level 0
+    - level 1
+        - level 2
+                - indented as level 4 but will be set to level 3
+    - level 1
+- level 0
+    - level 1
+part of the prev item
+also part of prev item
+
+not part of the above list.
+
+  - level0 but with leading indent
+  - level0 but with leading indent
+    - level1 but with leading indent
+
 
 this footnote should be deleted ([^12])
 
