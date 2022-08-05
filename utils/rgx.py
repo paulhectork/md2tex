@@ -1,9 +1,13 @@
-import click
-import sys
 import re
 
-
 from .minted import languages
+from .helpers import process_list_indentation
+
+
+# ---------------------------------------------------------------
+# regex based conversion from markdown to latex;
+# main scrips for the conversion process
+# ---------------------------------------------------------------
 
 
 class Regex:
@@ -94,71 +98,12 @@ class Regex:
         """
         lists = re.finditer(r"((^[ \t]*?-(?!-{2,}).*?\n)+(.+\n)*)+", string, flags=re.MULTILINE)
         for ls in lists:
-            # prepare list building:
-            # - extract list text
-            # - replace list in source markdown by token
-            # - if a list item is broken into several lines, group them into one line
+            # prepare list building
             lstext = ls[0]  # extract list text
-
             string = string.replace(lstext, "@@LISTTOKEN@@")  # add token to source
-            lstext = re.sub(r"\n(?!\s*-)", " ", lstext, flags=re.M)
+            lstext = re.sub(r"\n(?!\s*-)", " ", lstext, flags=re.M)  # group list item into one line
 
-            # get the indentation level to build nested `itemize`:
-            # - build a list of lists `[markdown list item, its indentation level]`
-            # - check that the indentation is valid:
-            #   - if all items are indented (no `^-`), then the shared leading spaces are removed
-            #   - if the list items have different indentation levels, all indentation
-            #     levels must be a multiple of the indentation of the 1st indented item
-            # - replace absolute number spaces by indentation levels.
-            #   - an item can only gain one indentation level at a time.
-            #     if an item jumps indentation level, reset the indentation level: prev = n, new = n+1.
-            #     (e.g.:
-            #      - indentation multiplier = 2
-            #      - previous item: indentation level = 2 => its absolute nesting level `n` is 1
-            #      - current item: indentation level = 6
-            #        => theoritically, its nesting level should be 3, but that doesn't make
-            #           sense and doesn't work in markdown => we reset it to 2.)
-            #   - in short: if n[current] - n[prev] > 1, then n[current] is redifined as n[prev] += 1
-            lsitems = []  # list of lists : [item content, indentation level]
-            firstindent = len(re.search(r"^\s*", lstext)[0])  # base indentation level
-            for item in re.split(r"\n", lstext):
-                indent = len(re.search(r"^\s*", item)[0]) - firstindent
-                if indent < 0:
-                    click.echo(
-                        "ERROR. - inconsistant indentation in markdown list \n"
-                        + f"{lstext} \n"
-                        + "all items must be as indented than the first list item or more."
-                    )
-                    sys.exit(1)
-                else:
-                    lsitems.append([
-                            re.sub(r"^\s*-\s*", "", item),  # item content
-                            indent  # indentation (n° of spaces)
-                    ])
-            # if there are different indentation levels,
-            # - check that all levels have a common multiplier
-            # - replace absolute number of spaces (li[1]) by indentation level (li[1] / mult)
-            # - if an item jumps indentation level (e.g., goes from level 1 to level3), correct it
-            if len(set([li[0] for li in lsitems])) > 1:  # if there are different indentation levels
-                mult = next((li[1] for li in lsitems if li[1] != 0), 0)  # the first indented item is the multiplier
-
-                for li in lsitems:
-                    # check that all list items have same multiplier;
-                    # `int(li[1] / mult) == li[1]` / mult checks that the division returns a round number
-                    if int(li[1] / mult) == li[1] / mult:
-                        li[1] = int(li[1] / mult)  # replace number of spaces by indentation level;
-                    else:
-                        click.echo(
-                            "ERROR. inconsistant indentation level in list \n"
-                            + f"{lstext} \nall list items must share a common indentation multiplier.\n"
-                            + "the first indented item defines the indentation multiplier."
-                        )
-                        sys.exit(1)
-                prev = 0  # previous indentation level
-                for li in lsitems:
-                    if li[1] > prev + 1:  # if one or several indent levels are jumped, reset them
-                        li[1] = prev + 1
-                    prev = li[1]
+            lsitems = process_list_indentation(lstext)  # process the visual indentation
 
             # build the `\itemize{}`
             items = ""
@@ -197,65 +142,36 @@ class Regex:
         """
         lists = re.finditer(r"((^[ \t]*?\d+\..*?\n?)+(.+\n?)*)+", string, flags=re.MULTILINE)
         for ls in lists:
-            # prepare list building:
-            # - extract list text
-            # - replace list in source markdown by token
-            # - if a list item is broken into several lines, group them into one line
+            # prepare list building
             lstext = ls[0]  # extract list text
-            string = string.replace(lstext, "@@LISTTOKEN@@")  # add token to source
-            lstext = re.sub(r"\n(?!\s*\d+\.)", " ", lstext, flags=re.M)
+            string = string.replace(lstext, "@@LISTTOKEN@@")  # replace source list by token
+            lstext = re.sub(r"\n(?!\s*\d+\.)", " ", lstext, flags=re.M)  # group list items into single line
 
-            # count the spaces to build nested lists
-            # - build a dict mapping to a list item the number of spaces at
-            #   beginning of lines to see if there are nested lists
-            lsdict = {}
-            for l in re.split(r"\n", lstext):
-                lsdict[re.sub(r"^\s*\d+\.\s*", "", l)] = len(re.match(r"^\s*", l)[0])
+            lsitems = process_list_indentation(lstext)  # process the visual indentation
 
-            levels = sorted(set(lsdict.values()))  # spaces determine list levels
+            # build the `\enumerate{}`
+            items = ""
+            prev = 0  # previous indentation level
+            for li in lsitems:
+                # open/close the good number of envs
+                if li[1] - prev > 0:  # if there are envs to open; shouldn't be > 1 env to open, but just in case
+                    items += "\\begin{enumerate} \n \\item " * (li[1] - prev)
+                    items += li[0] + "\n"
+                elif li[1] - prev < 0:  # if there are envs to close
+                    items += "\\end{enumerate}\n" * (prev - li[1])
+                    items += "\\item " + li[0] + "\n"
+                else:  # no envs to open/close
+                    items += "\\item " + li[0] + "\n"
+                prev = li[1]
 
-            # update lsdict's values:
-            # replace absolute number of spaces by nesting level.
-            # from that we'll determine the n° of nested envs to build at each iteration:
-            # base nesting level == 0, `enumerate` inside `enumerate` == 1...
-            for k, v in lsdict.items():
-                lsdict[k] = levels.index(v)
-
-            # build the possibly nested `enumerate`.
-            if len(levels) != 0:
-                # prev logs the nesting level of the previous item
-                # to determine the number of nested `enumerate` to build
-                prev = 0
-                items = ""
-                for k, v in lsdict.items():
-                    # open or close as many `enumerate` as needed: difference of nesting
-                    # between previous enumerate and new one.
-                    # if nesting_diff > 0, we need to create envs; if nesting_diff < 0, we need to close envs
-                    nesting_diff = v - prev  # (levels.index(v) - prev)
-                    if nesting_diff == 1:
-                        # in this case, we just need to create an extra env
-                        items += "\\begin{enumerate} \n"
-                    elif nesting_diff > 1:
-                        # here, we need to create \items containing the proper number of `enumerate` envs
-                        items += "\item\\begin{enumerate} \n" * nesting_diff
-                    elif nesting_diff < 0:
-                        # if the difference is negative, we close as many envs as needed
-                        items += "\end{enumerate} \n" * (prev - v)
-                    items += f"\item {k} \n"  # add item to list
-                    prev = v  # to determine the number of `enumerate` to build / destroy
-                    first = False  # 1st iteration done
-                items += "\end{enumerate} \n" * prev  # close the nested envs
-            else:
-                items = ""
-                for k in lsdict.keys():
-                    items += f"\item {k} \n"  # build items list
+            items += "\\end{itemize}\n" * prev  # close the remaining nested envs
 
             # once the list of \item and possibly nested `enumerate` is built,
             # build the final enumerate, add it to the markdown string and that's it !
             enumerate = r"""
-\begin{enumerate}
-@@ITEMTOKEN@@
-\end{enumerate}""".replace("@@ITEMTOKEN@@", items)
+            \begin{enumerate}
+            @@ITEMTOKEN@@
+            \end{enumerate}""".replace("@@ITEMTOKEN@@", items)
             string = string.replace("@@LISTTOKEN@@", enumerate)
 
         return string

@@ -94,10 +94,16 @@ It is revealed in "Skyhooks II" that Lumpy Space Princess is the most powerful o
 ##### Ordered list
 1. a - lvl1
 2. b - lvl1
-      1. c - lvl3
-   1. d - lvl2 
-   2. e - lvl2
-30. f - lvl3
+   1. c - lvl2 
+      1. d - lvl3 
+      2. e - lvl3
+         3. lvl4
+30. f - lvl1
+
+1. level0
+   2. level1
+   3. level1
+4. level0
 
 
 - level 0
