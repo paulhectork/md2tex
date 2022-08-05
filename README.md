@@ -75,7 +75,7 @@ the indentation is processed and what constitutes a valid list for this tool.
   will be removed before processing that list. this means that the first example will result in the same
   result as the second
 ```
-- list item with no starting space
+- list item with no leading space
 - same here
 ```
 
@@ -96,9 +96,9 @@ the indentation is processed and what constitutes a valid list for this tool.
 - this is an item at level 0
   - this is an item at level 1; the indentation is set as 2 whitespaces
   - same here; level 1.
-      - visually, this one is indented as level 3 as it starts with 6 leading whitespaces.
-        however, its indentation level will be reset from level 3 to level 2 to avoid skipping
-        an indentation level
+      - visually, this one seems indented as level 3 as it starts with 6 leading whitespaces.
+        however, its nesting level will be reset from level 3 to level 2 to avoid skipping
+        a nesting level
   - this item is at level 1
 ```
 
