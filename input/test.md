@@ -1,4 +1,8 @@
-# Lumpy space princess
+# Lumpy space princess [^11]
+
+[^11]: Content made available by the
+[adventure time wiki](https://adventuretime.fandom.com/wiki/Lumpy_Space_Princess)
+, released under CC-BY-SA
 
 ### About her
 
@@ -25,16 +29,23 @@ order to eat their crops. She had returned to Lumpy Space, but as of
 "Princess Monster Wife," she decided to go back to living on her own in the 
 woods as a hobo, presumably going back home every now and again to visit 
 her parents. 
+             
+this line should be in a different paragraph
 
 ```
 for i in range(6):
     print(i)
 ```
+
+http://stack_over\\flo\w.com/~foo%20bar#link
 
 ```python
+# this is just to say i've eaten the plums that were in the icebox
 for i in range(6):
     print(i)
 ```
+
+@@ hello @@ 
 
 -----
 
@@ -69,7 +80,7 @@ decent
     - pretty soup
   - ugly soup
 
-It is revealed in "Skyhooks II" that Lumpy Space Princess is the most powerful of the Elementals, a group of beings who embody the cosmic forces that make up Ooo. As the Elemental of Lumps, she can negate the powers of other Elementals and reverse the damage they cause, should they ever go rogue.
+It is revealed in "Skyhooks II" that Lumpy Space Princess is the most powerful of the Elementals, a group of beings who embody the cosmic forces that make up Ooo. <br> As the Elemental of Lumps, she can negate the powers of other Elementals and reverse the damage they cause, should they ever go rogue.
 
 *horrible list test, or, how to break your parser*
 
@@ -87,3 +98,7 @@ It is revealed in "Skyhooks II" that Lumpy Space Princess is the most powerful o
    1. d - lvl2 
    2. e - lvl2
 30. f - lvl3
+
+this footnote should be deleted ([^12])
+
+[^222]: this should be deleted too
