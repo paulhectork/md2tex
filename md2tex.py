@@ -10,8 +10,9 @@ from utils.rgx import Regex
 @click.argument("input")
 @click.option("-o", "--output-file", "output", default=None)
 @click.option("-c", "--complete-tex-file", "tex", is_flag=True, default=False)
+@click.option("-t", "--custom-tex-template", "template", default="utils/template.tex")
 @click.option("-f", "--french-quotes", "french_quotes", is_flag=True, default=False)
-def md2tex(input, output=None, tex=False, french_quotes=False):
+def md2tex(input: str, output=None, tex=False, template="utils/template.tex", french_quotes=False):
     """
     convert a markdown file to .tex.
 
@@ -19,11 +20,16 @@ def md2tex(input, output=None, tex=False, french_quotes=False):
     :param output: the destination to save the file to
     :param tex: a flag indicating wether to create a full tex file,
                 with preamble and table of contents
+    :param template: a custom TeX template to use for the conversion, in order
+                     to add extra packages and whatnot. the contents of
+                     \begin{document} - \end{document} should be empty, except for a
+                     title page; this part must contain a "__BODYTOKEN__" string to be
+                     able to append the TeX body to the template.
     :param french_quotes: whether to translate "" and '' as english tex quotes (``")
                           or french quotes (\enquote{})
     :return: data, a string representation of the .md file converted to .tex
     """
-    # ==================== process input + output info ==================== #
+    # ==================== PROCESS THE ARGUMENTS ==================== #
     if not re.search(r"\.md$", input):
         click.echo("file doesn't seem to be a markdown file. exiting...")
     if output is None:
@@ -48,29 +54,34 @@ def md2tex(input, output=None, tex=False, french_quotes=False):
     with open(input, mode="r") as fh:
         data = fh.read()
 
-    # ==================== convert the file ==================== #
+    # ==================== CONVERT THE FILE ==================== #
     # complex replacements
     data = Regex.block_quote(data)
     data = Regex.inline_quote(data, french_quotes)
     data = Regex.blockcode(data)
     data = Regex.unordered_l(data)
     data = Regex.ordered_l(data)
-    data = Regex.strip_space(data)
 
     # "simple" replacements. simple_sub contains regexes as keys
     # and values, facilitating the regex replacement
     for k, v in Regex.simple_sub.items():
         data = re.sub(k, v, data, flags=re.M)
+    data = Regex.strip_space(data)
 
-    # ==================== build + write output ==================== #
-    if tex is True:
-        pass  # create full tex file.
+    # ==================== BUILD + WRITE OUTPUT TO FILE ==================== #
+    if tex is True: # create full tex file.
+        try:
+            with open(template, mode="r") as fh:
+                data = fh.read().replace("__BODYTOKEN__", data)
+        except FileNotFoundError:
+            click.echo("ERROR : custom template not found. exiting...")
+            sys.exit(1)
     try:
         with open(output, mode="w") as fh:
             fh.write(data)
     except FileNotFoundError:
         click.echo("ERROR : output directory doesn't seem to exist. create it and start again...")
-    # click.echo(data)
+        sys.exit(1)
     return data
 
 
