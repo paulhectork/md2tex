@@ -1,7 +1,6 @@
-import click
-import sys
 import re
 
+from .errors_warnings import IndentationException
 
 # -----------------------------------------------
 # helpful functions
@@ -47,17 +46,13 @@ def process_list_indentation(lstext):
     for item in re.split(r"\n", lstext):
         indent = len(re.search(r"^\s*", item)[0]) - firstindent
         if indent < 0:
-            click.echo(
-                "ERROR. - inconsistant indentation in markdown list \n"
-                + f"{lstext} \n"
-                + "all items must be as indented than the first list item or more."
-            )
-            sys.exit(1)
+            raise IndentationException(key="firstindent", lstext=lstext)  # raise an error, print error msg, exit
         else:
             lsitems.append([
                 re.sub(r"^\s*-\s*", "", item),  # item content
                 indent  # indentation (n° of spaces)
             ])
+
     # if there are different indentation levels,
     # - check that all levels have a common multiplier
     # - replace absolute number of spaces (li[1]) by indentation level (li[1] / mult)
@@ -71,12 +66,8 @@ def process_list_indentation(lstext):
             if int(li[1] / mult) == li[1] / mult:
                 li[1] = int(li[1] / mult)  # replace number of spaces by indentation level;
             else:
-                click.echo(
-                    "ERROR. inconsistant indentation level in list \n"
-                    + f"{lstext} \nall list items must share a common indentation multiplier.\n"
-                    + "the first indented item defines the indentation multiplier."
-                )
-                sys.exit(1)
+                raise IndentationException(key="multiplier", lstext=lstext)  # raise an error, print error msg, exit
+
         prev = 0  # previous indentation level
         for li in lsitems:
             if li[1] > prev + 1:  # if one or several indent levels are skipped, reset them

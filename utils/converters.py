@@ -10,37 +10,18 @@ from .helpers import process_list_indentation
 # ---------------------------------------------------------------
 
 
-class Regex:
-    r"""
-    regular expressions and regex-related functions
-
-    contains
-    --------
+class Simple:
+    """
+    simple substitutions that are done using a dict
     simple_sub: a dict mapping to a regular expression its replacement,
                 to use with re.sub. only for simple elements of the markdown
                 syntax, like "*", "`"...
-    quote(): replace multiline markdown quotes (">") into latex \quote{}
-    inline_quote(): transform markdown quotes (`"`, `'`) into latex french or anglo saxon quotes
-    unoredered_l(): create latex `itemize` envs from md unnumbered lists
-    ordered_l(): create latex `enumerate` envs from md numbered lists
-    block_code(): create a latex minted or listings env from a md block of code
-    footnote(): replace markdown footnotes (`[\^\d+]`) into latex `\footnote{}` or `\endnote{}`
-    prepare_markdown(): replace markdown document by escaping special tex characters and
-                        removing code blocks from the rest of the pipeline
-    clean_tex(): clean the tex created and reinsert blocks of code at the end of the pipeline
     """
     simple_sub = {
         # code, bold, italics
         r"(?<!\*)\*{2}(?!\*)(.+?)(?<!\*)\*{2}(?!\*)": r"\\textbf{\1}",  # bold
         r"(?<!\*)\*(?!\*)(.+?)(?<!\*)\*(?!\*)": r"\\textit{\1}",  # italics
         r"(?<!`)`(?!`)(.+?)(?<!`)`(?!`)": r"\\texttt{\1}",  # inline code
-
-        # titles
-        r"^\s*(\\#){1}(?!\\#?)(.*?)$": r"\\chapter{\2}",  # 1st level title
-        r"^\s*(\\#){2}(?!\\#?)(.*?)$": r"\\section{\2}",  # 2nd level title
-        r"^\s*(\\#){3}(?!\\#?)(.*?)$": r"\\subsection{\2}",  # 3rd level title
-        r"^\s*(\\#){4}(?!\\#?)(.*?)$": r"\\subsubsection{\2}",  # 4th level title
-        r"^\s*(\\#){5,}(?!\\#?)(.*?)$": r"\n\n\\textbf{\2}\n\n",  # 5th+ level title
 
         # images and hyperlink
         r"(?<!!)\[(.*?)\]\((.*?)\)": r"\\href{\2}{\1}",  # hyperlink
@@ -53,9 +34,64 @@ class Regex:
 
         # separators
         r"-{3,}": r"\\par\\noindent\\rule{\\linewidth}{0.4pt}",  # horizontal line
-        r"<br>": "\n\n",
+        r"<br/?>": "\n\n",  # line breaks
     }
 
+    @staticmethod
+    def convert(string: str):
+        """
+        perform the conversion: replace markdown syntax by TeX syntax
+        :param string: the string rpr of the markdown file to convert
+        :return: string with the conversion performed
+        """
+        for k, v in Simple.simple_sub.items():
+            string = re.sub(k, v, string, flags=re.M)
+        return string
+
+
+class Header:
+    """
+    header substitutions
+
+    contains
+    --------
+    title_unnumbered_sub: a dict to convert markdown headers to latex unnumbered sections
+    title_numbered_sub: a dict to convert markdown headers to latex numbered sections
+    """
+    title_numbered_sub = {
+        r"^\s*(\\#){1}(?!\\#?)(.*?)$": r"\\chapter{\2}",  # 1st level title
+        r"^\s*(\\#){2}(?!\\#?)(.*?)$": r"\\section{\2}",  # 2nd level title
+        r"^\s*(\\#){3}(?!\\#?)(.*?)$": r"\\subsection{\2}",  # 3rd level title
+        r"^\s*(\\#){4}(?!\\#?)(.*?)$": r"\\subsubsection{\2}",  # 4th level title
+        r"^\s*(\\#){5,}(?!\\#?)(.*?)$": r"\n\n\\textbf{\2}\n\n",  # 5th+ level title
+    }
+    title_unnumbered_sub = {
+        r"^\s*(\\#){1}(?!\\#?)(.*?)$": r"\\chapter*{\2}",  # 1st level title
+        r"^\s*(\\#){2}(?!\\#?)(.*?)$": r"\\section*{\2}",  # 2nd level title
+        r"^\s*(\\#){3}(?!\\#?)(.*?)$": r"\\subsection*{\2}",  # 3rd level title
+        r"^\s*(\\#){4}(?!\\#?)(.*?)$": r"\\subsubsection*{\2}",  # 4th level title
+        r"^\s*(\\#){5,}(?!\\#?)(.*?)$": r"\n\n\\textbf*{\2}\n\n",  # 5th+ level title
+    }
+
+    @staticmethod
+    def convert(string, numbered=True):
+        """
+        perform the conversion: replace markdown titles by numbered or unnumbered LaTeX titles
+        """
+        substitute = Header.title_numbered_sub if numbered is True else Header.title_unnumbered_sub
+        for k, v in substitute.items():
+            string = re.sub(k, v, string, flags=re.M)
+
+
+class Quote:
+    """
+    inline and block quote substitution
+
+    contains
+    --------
+    block_quote(): replace multiline markdown quotes (">") into latex \quote{}
+    inline_quote(): transform markdown quotes (`"`, `'`) into latex french or anglo saxon quotes
+    """
     @staticmethod
     def block_quote(string: str):
         """
@@ -89,6 +125,16 @@ class Regex:
             string = re.sub(r"'(.*)'", r"`\1'", string)
         return string
 
+
+class List:
+    """
+    list substitution: replace markdown nested lists by LaTeX nested lists
+
+    contains
+    --------
+    unoredered_l(): create latex `itemize` envs from md unnumbered lists
+    ordered_l(): create latex `enumerate` envs from md numbered lists
+    """
     @staticmethod
     def unordered_l(string: str):
         """
@@ -176,6 +222,14 @@ class Regex:
 
         return string
 
+class Code:
+    """
+    block code substitution
+
+    contains
+    --------
+    block_code(): create a latex minted or listings env from a md block of code
+    """
     @staticmethod
     def block_code(string: str):
         """
@@ -229,6 +283,16 @@ class Regex:
 
         return string
 
+
+class Reference:
+    """
+    substitutions for references inside a markdown document.
+    currently only for footnote substitutions
+
+    contains
+    --------
+    footnote(): replace markdown footnotes (`[\^\d+]`) into latex `\footnote{}` or `\endnote{}`
+    """
     @staticmethod
     def footnote(string: str, endnote: bool):
         r"""
@@ -280,6 +344,17 @@ class Regex:
 
         return string
 
+
+class Cleaner:
+    """
+    clean the input markdown and output LaTeX.
+
+    contains
+    --------
+    prepare_markdown(): replace markdown document by escaping special tex characters and
+                        removing code blocks from the rest of the pipeline
+    clean_tex(): clean the tex created and reinsert blocks of code at the end of the pipeline
+    """
     @staticmethod
     def prepare_markdown(string: str):
         """

@@ -14,13 +14,15 @@ from utils.rgx import Regex
 @click.option("-t", "--custom-tex-template", "template", default="utils/template.tex")
 @click.option("-f", "--french-quote", "french_quote", is_flag=True, default=False)
 @click.option("-e", "--endnote", "endnote", is_flag=True, default=False)
+@click.option("-n", "--numbered-headers", "numbered", is_flag=True, default=True)
 def md2tex(
         inpath: str,
         outpath=None,
         tex=False,
         template="utils/template.tex",
         french_quote=False,
-        endnote=False
+        endnote=False,
+        numbered=True
 ):
     """
     convert a markdown file to .tex.
@@ -38,6 +40,9 @@ def md2tex(
                           or french quotes (\enquote{})
     :param endnote: translate the markdown footnotes (`[^\d+]`) as latex `\endnote{}`
                     instead of `\footnote`
+    :param numbered: wether to convert headers as numbered chapters/sections (`\chapter{}`)
+                     or as unnumbered ones (`\chapter*{}`). defaults to True:
+                     the headers are numbered by default.
     :return: data, a string representation of the .md file converted to .tex
     """
     # ==================== PROCESS THE ARGUMENTS ==================== #
