@@ -33,6 +33,9 @@ from utils.errors_warnings import InputException, Warnings
 @click.option("-u", "--unumbered-headers", "unnumbered", is_flag=True, default=False,
               help="optional. if provided, Markdown headers will be translated as TeX unnumbered headers/sections"
                    + "defaults to False: the headers are numbered by default.")
+@click.option("-d", "--document-class", "document_class", default="article",
+              help="optional. sets the class of the TeX document. possible values "
+                   + "are: `book`|`article`. defaults to `article`")
 def md2tex(
         inpath: str,
         outpath=None,
@@ -41,6 +44,7 @@ def md2tex(
         french_quote=False,
         endnote=False,
         unnumbered=False,
+        document_class="article"
 ):
     """
     convert a Markdown file to a TeX file.
@@ -65,6 +69,7 @@ def md2tex(
                      or as unnumbered ones (`\chapter*{}`). defaults to False:
                      the headers are numbered by default.
     :param make_out_dirs: wether or not to create non-existant output directories
+    :param document_class: the document class of the tex document. defaults to `article`
     :return: data, a string representation of the .md file converted to .tex
     """
     # ==================== PROCESS THE ARGUMENTS ==================== #
@@ -76,11 +81,15 @@ def md2tex(
         outpath = "output/" + re.sub(r'\..+?$', '.tex', basename(inpath))  # build default outpath
     elif "/" in outpath and "\\" in outpath:
         raise InputException("outpath_slashes", outpath)  # gnu-linux escapes backslashes so this shouldn't be called
-    elif not re.search(r"\.tex$", outpath):
+    elif os.path.isdir(outpath):  # if the output path is a dir and not a file, save the file to that dir
+        outpath = f"{outpath}/{basename(inpath)}"
+    if not re.search(r"\.tex$", outpath):
         # add a .tex extension if it doesn't exist or if a different extension was
         # provided by the user
         Warnings("outpath_extension", outpath)
         outpath = re.sub(r"$", ".tex", outpath)
+    if not re.search("^(book|article)$", document_class):
+        InputException("document_class", document_class)
 
     # build output directory
     if not os.path.exists("./output"):
@@ -101,7 +110,7 @@ def md2tex(
     data = MDList.unordered_l(data)
     data = MDList.ordered_l(data)
     data = MDReference.footnote(data, endnote)
-    data = MDHeader.convert(data, unnumbered)
+    data = MDHeader.convert(data, unnumbered, document_class)
 
     # "simple" replacements. simple_sub contains regexes as keys
     # and values, facilitating the regex replacement
@@ -117,6 +126,7 @@ def md2tex(
                     raise InputException("template_no_token", template)
                 else:
                     data = tex_template.replace("@@BODYTOKEN@@", data)
+                    data = data.replace("@@DOCUMENTCLASSTOKEN@@", document_class)
         except FileNotFoundError:
             raise InputException("not_template", template)
     try:

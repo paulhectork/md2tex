@@ -53,15 +53,17 @@ class InputException(Exception):
         "outpath_slashes": "ERROR - output file path `@@TOKEN@@` contains '/' and '\\'. "
                            + "please remove slashes or backslashes to continue."
                            + "exiting...",
+        "document_class": "ERROR - invalid value provided for argument `--document-class`: `@@TOKEN@@`. "
+                          + "allowed values are `article` or `book`. exiting..."
     }  # all possible error logs
 
-    def __init__(self, key, fpath=None):
+    def __init__(self, key, val=None):
         """
         launch an OSInpytException: return an error log and exit
         :param key: the error key to print the proper log
-        :param fpath: the user inputted file path which caused the error
+        :param val: the user inputted value which caused the error
         """
-        click.echo(InputException.logs[key].replace("@@TOKEN@@", fpath))
+        click.echo(InputException.logs[key].replace("@@TOKEN@@", val))
         sys.exit(1)
 
 
@@ -74,10 +76,10 @@ class Warnings:
         "list_deep_nesting": "WARNING - deep list nesting. you may need to change base tex options in the header."
     }
 
-    def __init__(self, key, fpath=None):
+    def __init__(self, key, val=None):
         """
         display a warning message to the user.
         :param key: the key pointing to the message from Warnings.log to print
-        :param fpath: a file path in case of warning on user file inpyt
+        :param val: a possible value for a custom warning message.
         """
-        click.echo(Warnings.logs[key].replace("@@TOKEN@@", fpath))
+        click.echo(Warnings.logs[key].replace("@@TOKEN@@", val))

@@ -114,3 +114,5 @@ the indentation is processed and what constitutes a valid list for this tool.
 
 ## License
 released under GNU GPL v3.
+
+md2tex README.md -c -t ./readme/readme_article_template.tex -o ./readme/README_article.tex -d article -u

@@ -56,36 +56,57 @@ class MDHeader:
 
     contains
     --------
-    title_unnumbered_sub: a dict to convert markdown headers to latex unnumbered sections
-    title_numbered_sub: a dict to convert markdown headers to latex numbered sections
+    book_unnumbered: a dict to convert markdown headers to latex `book` document class unnumbered sections
+    book_numbered: a dict to convert markdown headers to latex `book` document class numbered sections
+    article_unnumbered: a dict to convert markdown headers to latex `book` document class unnumbered sections
+    article_numbered: a dict to convert markdown headers to latex `book` document class numbered sections
     """
-    title_numbered_sub = {
+    book_numbered = {
         r"^\s*(\\#){1}(?!\\#?)(.*?)$": r"\\chapter{\2}\n",  # 1st level title
         r"^\s*(\\#){2}(?!\\#?)(.*?)$": r"\\section{\2}\n",  # 2nd level title
         r"^\s*(\\#){3}(?!\\#?)(.*?)$": r"\\subsection{\2}\n",  # 3rd level title
         r"^\s*(\\#){4}(?!\\#?)(.*?)$": r"\\subsubsection{\2}\n",  # 4th level title
         r"^\s*(\\#){5,}(?!\\#?)(.*?)$": r"\n\n\\textbf{\2}\n\n",  # 5th+ level title
     }
-    title_unnumbered_sub = {
+    book_unnumbered = {
         r"^\s*(\\#){1}(?!\\#?)(.*?)$": r"\\chapter*{\2}\n\\addcontentsline{toc}{chapter}{\2}\n",
         r"^\s*(\\#){2}(?!\\#?)(.*?)$": r"\\section*{\2}\n\\addcontentsline{toc}{section}{\2}\n",
         r"^\s*(\\#){3}(?!\\#?)(.*?)$": r"\\subsection*{\2}\n\\addcontentsline{toc}{subsection}{\2}\n",
         r"^\s*(\\#){4}(?!\\#?)(.*?)$": r"\\subsubsection*{\2}\n\\addcontentsline{toc}{subsubsection}{\2}\n",
-        r"^\s*(\\#){5,}(?!\\#?)(.*?)$": r"\n\n\\textbf*{\2}\n\n",
+        r"^\s*(\\#){5,}(?!\\#?)(.*?)$": r"\n\n\\noindent{}\\textbf*{\2}\n\n",
+    }
+    article_numbered = {
+        r"^\s*(\\#){1}(?!\\#?)(.*?)$": r"\\section{\2}\n",  # 1st level title
+        r"^\s*(\\#){2}(?!\\#?)(.*?)$": r"\\subsection{\2}\n",  # 2nd level title
+        r"^\s*(\\#){3}(?!\\#?)(.*?)$": r"\\subsubsection{\2}\n",  # 3rd level title
+        r"^\s*(\\#){4,}(?!\\#?)(.*?)$": r"\n\n\\noindent{}\\textbf{\2}\n\n",  # 4th level title
+    }
+    article_unnumbered = {
+        r"^\s*(\\#){1}(?!\\#?)(.*?)$": r"\\section*{\2}\n\\addcontentsline{toc}{section}{\2}\n",
+        r"^\s*(\\#){2}(?!\\#?)(.*?)$": r"\\section*{\2}\n\\addcontentsline{toc}{subsection}{\2}\n",
+        r"^\s*(\\#){3}(?!\\#?)(.*?)$": r"\\subsection*{\2}\n\\addcontentsline{toc}{subsubsection}{\2}\n",
+        r"^\s*(\\#){4,}(?!\\#?)(.*?)$": r"\n\n\\noindent{}\\textbf*{\2}\n\n",
     }
 
     @staticmethod
-    def convert(string: str, unnumbered: bool):
+    def convert(string: str, unnumbered: bool, document_class: str):
         """
         perform the conversion: replace markdown titles by numbered or unnumbered LaTeX titles
         :param string: the markdown representation of the string to convert
         :param unnumbered: flag argument indicating that the LaTeX headers should be unnumbered
+        :param document_class: the class to convert the document to
         :return: processed string
         """
         if unnumbered is True:
-            substitute = MDHeader.title_unnumbered_sub
+            if document_class == "article":
+                substitute = MDHeader.article_unnumbered
+            else:
+                substitute = MDHeader.book_unnumbered
         else:
-            substitute = MDHeader.title_numbered_sub
+            if document_class == "article":
+                substitute = MDHeader.article_numbered
+            else:
+                substitute = MDHeader.book_numbered
         for k, v in substitute.items():
             string = re.sub(k, v, string, flags=re.M)
         return string
@@ -281,9 +302,9 @@ class MDCode:
             # in it
             else:
                 env = r"""
-\begin{verbatim}
+\begin{Verbatim}[breaklines=true]
 @@CODETOKEN@@
-\end{verbatim}
+\end{Verbatim}
                 """  # env to add the code to
                 code = env.replace("@@CODETOKEN@@", re.sub(r"```", "", code, flags=re.M))  # reinject code block to env
 
@@ -374,7 +395,7 @@ class MDCleaner:
 
         this function is used after `block_code()` to avoid replacing
         special characters that should be interpreted verbatim by LaTeX.
-        to escape all `minted` and `verbatim` code we use a dict that stores all
+        to escape all `minted` and `Verbatim` code we use a dict that stores all
         these blocks of code.
 
         :param string: the string representation of a markdown file
@@ -388,7 +409,7 @@ class MDCleaner:
         # for that, store all code blocks in a dict, replace them in `string`
         # with a special token. this token uses `+` because they aren't LaTeX
         # special characters
-        codematch = re.finditer(r"\\begin\{(listing|verbatim)}(.|\n)*?\\end\{(listing|verbatim)}", string, flags=re.M)
+        codematch = re.finditer(r"\\begin\{(listing|Verbatim)}(.|\n)*?\\end\{(listing|Verbatim)}", string, flags=re.M)
         n = 0
         codedict = {}
         for match in codematch:
@@ -428,6 +449,8 @@ class MDCleaner:
         string = re.sub(r"{\s+", r"{", string, flags=re.M)
         string = re.sub(r"\s+}", r"}", string, flags=re.M)
         string = re.sub(r"\n{2,}", r"\n\n", string, flags=re.M)
+        string = re.sub(r"(\\begin\{.*?)\n{2,}", r"\1\n", string, flags=re.M)
+        string = re.sub(r"\n{2,}(\\end\{)", r"\n\1", string, flags=re.M)
 
         string = string.replace("USERRESERVEDTOKEN", "@@")
 

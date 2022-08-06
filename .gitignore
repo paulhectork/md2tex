@@ -6,6 +6,7 @@ output/*
 .idea
 
 ## aux TeX files
+_minted-*
 *.acn
 *.acr
 *.alg

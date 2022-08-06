@@ -1,0 +1,126 @@
+\section{\texttt{md2tex} - a CLI to convert Markdown to TeX}
+
+\texttt{md2tex} is a simple but customizable markdown to TeX converter. rather than using fancy object oriented 
+libraries, it locates elements of markdown syntax using regular expressions and translates them into TeX syntax.
+it has only been tested with latin script so far. still a work in progress.
+
+\par\noindent\rule{\linewidth}{0.4pt}
+\subsection{Features}
+
+\begin{itemize}
+\item translation from markdown to TeX
+\item creation of a complete and valid TeX document, either from a generic template or using your own template
+\item saving to a custom file(path)
+\item several options for extra customization 
+\end{itemize}
+
+\par\noindent\rule{\linewidth}{0.4pt}
+\subsection{Markdown syntax}
+
+\textbf{currently supported}
+
+\begin{itemize}
+\item line breaks: paragraph changes using \texttt{\textbackslash{}n\textbackslash{}n}, \texttt{<br} and \texttt{<br/}
+\item \textbf{bold}, \textit{italic} and \texttt{inline code} text. \textbf{warning}:
+\begin{itemize} 
+ \item only bold and italics made using \textbackslash{}* will be translated
+\end{itemize}
+\item block quotes (lines beginning with \texttt{}). \textbf{warning}: only non-nested block quotes -- or the outer level of a nested block quote -- will be rendered.
+\item multiline code; if possible, the code is colored thanks to \texttt{minted}
+\item ordrered and unordered lists, including nested lists. \textbf{warning} : 
+\begin{itemize} 
+ \item this CLI is made to work with as-messy-as-possible data; if your lists are messy (using different levels of space...), it will create messy nested lists too.
+\item unordered lists will only be converted if they begin with \texttt{-}. any other list token will be ignored.
+\end{itemize}
+\item titles and different title levels
+\item images
+\item URLs
+\item inline quotes : french and english style, nested quotes.
+\item footnotes ; \textbf{warning}: loose footnotes (references in the body that point to nothing or footnotes that point to nothing in the body) will be deleted. 
+\end{itemize}
+
+\textbf{unsupported}
+
+\begin{itemize}
+\item markdown tables
+\item end-of-line backslashes to mark a line break
+\item strikethrough
+\item emojis
+\item tasks lists
+\item definition lists
+\item text blocks inside lists. they will be processed as the continuation of a list item 
+\end{itemize}
+
+\par\noindent\rule{\linewidth}{0.4pt}
+\subsection{Things that will mess with the output}
+
+\begin{itemize}
+\item poorly formed markdown
+\item things that are currently not supported
+\item unnumbered lists made using non-standard markdown syntax (lists not beginning with \texttt{-}...)
+\item numbered lists using additional numbering keys, such as \texttt{1. a}. in this case, \texttt{1.} will be deleted and \texttt{a} will be kept, so the TeX file will contain double numbering (the \texttt{enumerate} numbering and this numbering key)
+\item highly nested lists are not supported by default in LaTeX, but this can be changed in your preamble
+\item multiple footnotes with the same key; for the footnote restructuration to work, there must be unique footnote numbers and only one note per footnote number.
+\item loose footnotes that point to nothing will be deleted 
+\end{itemize}
+
+clean your file first ! you can also make the bulk of the translation using this cli and fine tune your \texttt{.tex} 
+file later on.
+
+\par\noindent\rule{\linewidth}{0.4pt}
+\subsection{About nested lists and visual indentation}
+
+list nesting and visual indentation is a bit of a pickle, so here's an explanation of how
+the indentation is processed and what constitutes a valid list for this tool.
+
+\textbf{what is a valid list?}
+
+\begin{itemize}
+\item all items must be \textbf{as indented than the first list item} or more. the indentation level of the first item will be removed before processing that list. this means that the first example will result in the same result as the second 
+\end{itemize}
+
+\begin{Verbatim}[breaklines=true]
+- list item with no leading space
+- same here
+\end{Verbatim}
+
+\begin{Verbatim}[breaklines=true]
+  - list item with two leading spaces
+  - same here, still a valid list
+\end{Verbatim}
+
+\begin{itemize}
+\item all indentation levels must be a multiple of the leading spaces of the first nested item. if the first nested list item is indented with 4 whitespaces, all nested items must be indented with a multiple of 4 spaces. for example, a list item can't be indented with 3 spaces while another one is indented with 4 spaces. 
+\end{itemize}
+
+\begin{itemize}
+\item the above two rules cause the script to exit with an error message pointing to the faulty list. on top of that, in keeping with LaTeX and markdown logic, a list item can't skip a nesting level. this will \textbf{not} stop the script, the indentation will just be reset automatically. 
+\end{itemize}
+
+\begin{Verbatim}[breaklines=true]
+- this is an item at level 0
+  - this is an item at level 1; the indentation is set as 2 whitespaces
+  - same here; level 1.
+   - visually, this one seems indented as level 3 as it starts with 6 leading whitespaces.
+   however, its nesting level will be reset from level 3 to level 2 to avoid skipping
+   a nesting level
+  - this item is at level 1
+\end{Verbatim}
+
+\textbf{technically, how does it work ?}
+
+\begin{itemize}
+\item the complete markdown list is located
+\item each list item is mapped to its indentation level, in number of leading spaces.
+\item the list is validated. if it is not valid, the script stops.
+\item an indentation multiplier is defined: it is the number of spaces in the first nested list item
+\item this multiplier is used to map each list item to its nesting level
+\item the markdown is syntax is replaced my markdown syntax. 
+\end{itemize}
+
+\par\noindent\rule{\linewidth}{0.4pt}
+\subsection{License}
+
+released under GNU GPL v3.
+
+md2tex README.md -c -t ./readme/readme\_article\_template.tex -o ./readme/README\_article.tex -d article -u
