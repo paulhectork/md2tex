@@ -7,10 +7,11 @@ from .helpers import process_list_indentation
 # ---------------------------------------------------------------
 # regex based conversion from markdown to latex;
 # main scrips for the conversion process
+# functions are part of classes for clarity
 # ---------------------------------------------------------------
 
 
-class Simple:
+class MDSimple:
     """
     simple substitutions that are done using a dict
     simple_sub: a dict mapping to a regular expression its replacement,
@@ -44,12 +45,12 @@ class Simple:
         :param string: the string rpr of the markdown file to convert
         :return: string with the conversion performed
         """
-        for k, v in Simple.simple_sub.items():
+        for k, v in MDSimple.simple_sub.items():
             string = re.sub(k, v, string, flags=re.M)
         return string
 
 
-class Header:
+class MDHeader:
     """
     header substitutions
 
@@ -78,12 +79,13 @@ class Header:
         """
         perform the conversion: replace markdown titles by numbered or unnumbered LaTeX titles
         """
-        substitute = Header.title_numbered_sub if numbered is True else Header.title_unnumbered_sub
+        substitute = MDHeader.title_numbered_sub if numbered is True else MDHeader.title_unnumbered_sub
         for k, v in substitute.items():
             string = re.sub(k, v, string, flags=re.M)
+        return string
 
 
-class Quote:
+class MDQuote:
     """
     inline and block quote substitution
 
@@ -126,7 +128,7 @@ class Quote:
         return string
 
 
-class List:
+class MDList:
     """
     list substitution: replace markdown nested lists by LaTeX nested lists
 
@@ -222,7 +224,7 @@ class List:
 
         return string
 
-class Code:
+class MDCode:
     """
     block code substitution
 
@@ -284,7 +286,7 @@ class Code:
         return string
 
 
-class Reference:
+class MDReference:
     """
     substitutions for references inside a markdown document.
     currently only for footnote substitutions
@@ -345,7 +347,7 @@ class Reference:
         return string
 
 
-class Cleaner:
+class MDCleaner:
     """
     clean the input markdown and output LaTeX.
 

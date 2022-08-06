@@ -20,10 +20,10 @@ class IndentationException(ParsingException):
     """
     logs = {
         "firstindent": "ERROR. - inconsistant indentation in markdown list \n"
-                       + "@@TOKEN@@ \n"
+                       + "`@@TOKEN@@` \n"
                        + "all items must be as indented than the first list item or more.",
         "multiplier": "ERROR. inconsistant indentation level in list \n"
-                      + "@@TOKEN@@ \nall list items must share a common indentation multiplier.\n"
+                      + "`@@TOKEN@@` \nall list items must share a common indentation multiplier.\n"
                       + "the first indented item defines the indentation multiplier."
 
     }  # all possible error logs
@@ -37,29 +37,31 @@ class IndentationException(ParsingException):
         click.echo(IndentationException.logs[key].replace("@@TOKEN@@", lstext))
 
 
-class OSInputException(Exception):
+class InputException(Exception):
     """
-    base class for all OS errors caused by user input: files not found, invalid files...
+    base class for all errors caused by user input: files not found, invalid files...
     """
     logs = {
-        "not_md": "ERROR - filename @@TOKEN@@ doesn't end with `.md` "
+        "not_md": "ERROR - filename `@@TOKEN@@` doesn't end with `.md` "
                   + "and doesn't seem to be a markdown file. exiting...",
-        "not_inpath": "ERROR - input file @@TOKEN@@ not found. exiting...",
-        "not_tex": "ERROR - custom tex template @@TOKEN@@ not found. exiting...",
-        "not_outpath": "ERROR - output directory(ies) for path @@TOKEN@@ doesn't "
+        "not_inpath": "ERROR - input file `@@TOKEN@@` not found. exiting...",
+        "not_template": "ERROR - custom tex template `@@TOKEN@@` not found. exiting...",
+        "template_no_token": "ERROR - custom tex template `@@TOKEN@@` does not contain a "
+                        + "@@BODYTOKEN@@ key. cannot perform replacement.",
+        "not_outpath": "ERROR - output directory or directories for path `@@TOKEN@@` don't "
                        + "seem to exist. create it and start again...",
-        "outpath_slashes": "ERROR - output file path @@TOKEN@@ contains '/' and '\\'. "
+        "outpath_slashes": "ERROR - output file path `@@TOKEN@@` contains '/' and '\\'. "
                            + "please remove slashes or backslashes to continue."
                            + "exiting...",
     }  # all possible error logs
 
-    def __init__(self, key, fpath):
+    def __init__(self, key, fpath=None):
         """
         launch an OSInpytException: return an error log and exit
         :param key: the error key to print the proper log
         :param fpath: the user inputted file path which caused the error
         """
-        click.echo(OSInputException.logs[key].replace("@@TOKEN@@", fpath))
+        click.echo(InputException.logs[key].replace("@@TOKEN@@", fpath))
         sys.exit(1)
 
 
@@ -68,9 +70,14 @@ class Warnings:
     class to display custom warning errors
     """
     logs = {
-        "outpah_extension": "WARNING - file extension changed to .tex",
+        "outpath_extension": "WARNING - file extension of output file `@@TOKEN@@` changed to `.tex`",
         "list_deep_nesting": "WARNING - deep list nesting. you may need to change base tex options in the header."
     }
 
-    def __init__(self, msg):
-        click.echo(Warnings.logs[msg])
+    def __init__(self, key, fpath=None):
+        """
+        display a warning message to the user.
+        :param key: the key pointing to the message from Warnings.log to print
+        :param fpath: a file path in case of warning on user file inpyt
+        """
+        click.echo(Warnings.logs[key].replace("@@TOKEN@@", fpath))
