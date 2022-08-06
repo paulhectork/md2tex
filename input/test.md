@@ -1,4 +1,4 @@
-# Lumpy space princess [^11]
+# Lumpy space princess
 
 [^11]: Content made available by the
 [adventure time wiki](https://adventuretime.fandom.com/wiki/Lumpy_Space_Princess)
@@ -13,14 +13,14 @@
 
 > LSP !
 
-Lumpy Space Princess ![esse cillum](~/bureau/lsp.png) (possibly known as Lumpy Space Queen and often 
+Lumpy Space Princess ![esse cillum](../img/lsp.png) (possibly known as Lumpy Space Queen and often 
 referred "to 'by her' initials", LSP) is the queen of Lumpy Space. She is one 
 of the three most recurring princesses, the other two being Flame Princess 
 and Princess Bubblegum. Finn and Jake have traveled to Lumpy Space as well 
 as to her parents' residence after she accidentally bit Jake in "Trouble 
 in Lumpy Space". According to the events in "Princess Day," she is not 
 recognized by the chair of princesses, partially because of her dramatic 
-attitude and the fact that she is no longer the heir to Lumpy Space. 
+attitude and the fact that she is no longer the heir to Lumpy Space.[^11]
 
 Since the episode "To Cut a Woman's Hair," Lumpy Space Princess lived on 
 her own in the woods of Ooo. According to her story in "The Monster," she 

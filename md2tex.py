@@ -9,12 +9,30 @@ from utils.errors_warnings import InputException, Warnings
 
 @click.command("md2tex")
 @click.argument("inpath")
-@click.option("-o", "--output-path", "outpath", default=None)
-@click.option("-c", "--complete-tex-file", "tex", is_flag=True, default=False)
-@click.option("-t", "--custom-tex-template", "template", default="utils/template.tex")
-@click.option("-f", "--french-quote", "french_quote", is_flag=True, default=False)
-@click.option("-e", "--endnote", "endnote", is_flag=True, default=False)
-@click.option("-n", "--numbered-headers", "numbered", is_flag=True, default=True)
+@click.option("-o", "--output-path", "outpath", default=None,
+              help="optional. a custom output path. defaults to `output/{input_file_name}.md`.")
+@click.option("-c", "--complete-tex-file", "tex", is_flag=True, default=False,
+              help="optional. if provided, a complete TeX file will be created from a template (with "
+              + "preamble and tables of content). if not provided, only the contents of the markdown "
+              + "file are translated. can be used with `-t` to use a custom, user-provided TeX template. "
+              + "defaults to `False`.")
+@click.option("-t", "--custom-tex-template", "template", default="utils/template.tex",
+              help="optional. if provided, a custom TeX template will be used to create a complete TeX file. "
+                   + "this argument must be used with `-c` and the TeX template must contain a "
+                   + "`@@BODYTOKEN@@` between its `\\begin{document}` and `\\end{document}` "
+                   + "to perform the replacement. "
+                   + "defaults to `utils/template.tex`")
+@click.option("-f", "--french-quote", "french_quote", is_flag=True, default=False,
+              help="optional. if provided, the Markdown inline quotes will be converted"
+                   " as french quotes `\\enquote{}` instead of anglo-saxon quotes."
+                   + "defaults to `False`: quotes are translated as anglo-saxon quotes.")
+@click.option("-e", "--endnote", "endnote", is_flag=True, default=False,
+              help="optional. if provided, the Markdown footnotes will be translated as TeX endnotes (`\\endnote{}`)"
+                   + "instead of the usual `\\footnote{}`."
+                   + "defaults to `False`: Markdown footnotes are translated as TeX footnotes.")
+@click.option("-u", "--unumbered-headers", "unnumbered", is_flag=True, default=False,
+              help="optional. if provided, Markdown headers will be translated as TeX unnumbered headers/sections"
+                   + "defaults to False: the headers are numbered by default.")
 def md2tex(
         inpath: str,
         outpath=None,
@@ -22,12 +40,14 @@ def md2tex(
         template="utils/template.tex",
         french_quote=False,
         endnote=False,
-        numbered=True,
-        make_out_dirs=False
+        unnumbered=False,
 ):
     """
-    convert a markdown file to .tex.
+    convert a Markdown file to a TeX file.
 
+    \b
+    parameters (see options if you are in `--help` mode):
+    -----------------------------------------------------
     :param inpath: the path to the *.md file to convert to tex
     :param outpath: the path to save the file to
     :param tex: a flag indicating wether to create a full tex file,
@@ -41,8 +61,8 @@ def md2tex(
                           or french quotes (\enquote{})
     :param endnote: translate the markdown footnotes (`[^\d+]`) as latex `\endnote{}`
                     instead of `\footnote`
-    :param numbered: wether to convert headers as numbered chapters/sections (`\chapter{}`)
-                     or as unnumbered ones (`\chapter*{}`). defaults to True:
+    :param unnumbered: wether to convert headers as numbered chapters/sections (`\chapter{}`)
+                     or as unnumbered ones (`\chapter*{}`). defaults to False:
                      the headers are numbered by default.
     :param make_out_dirs: wether or not to create non-existant output directories
     :return: data, a string representation of the .md file converted to .tex
@@ -81,7 +101,7 @@ def md2tex(
     data = MDList.unordered_l(data)
     data = MDList.ordered_l(data)
     data = MDReference.footnote(data, endnote)
-    data = MDHeader.convert(data, numbered)
+    data = MDHeader.convert(data, unnumbered)
 
     # "simple" replacements. simple_sub contains regexes as keys
     # and values, facilitating the regex replacement
@@ -107,7 +127,3 @@ def md2tex(
 
     click.echo(f"FINISHED - file conversion completed and saved to `{outpath}`")
     return data
-
-
-if __name__ == "__main__":
-    md2tex()

@@ -57,7 +57,7 @@ def process_list_indentation(lstext):
     # - check that all levels have a common multiplier
     # - replace absolute number of spaces (li[1]) by indentation level (li[1] / mult)
     # - if an item jumps indentation level (e.g., goes from level 1 to level3), correct it
-    if len(set([li[0] for li in lsitems])) > 1:  # if there are different indentation levels
+    if len(set([li[1] for li in lsitems])) > 1:  # if there are different indentation levels
         mult = next((li[1] for li in lsitems if li[1] != 0), 0)  # the first indented item is the multiplier
 
         for li in lsitems:

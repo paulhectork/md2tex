@@ -60,26 +60,32 @@ class MDHeader:
     title_numbered_sub: a dict to convert markdown headers to latex numbered sections
     """
     title_numbered_sub = {
-        r"^\s*(\\#){1}(?!\\#?)(.*?)$": r"\\chapter{\2}",  # 1st level title
-        r"^\s*(\\#){2}(?!\\#?)(.*?)$": r"\\section{\2}",  # 2nd level title
-        r"^\s*(\\#){3}(?!\\#?)(.*?)$": r"\\subsection{\2}",  # 3rd level title
-        r"^\s*(\\#){4}(?!\\#?)(.*?)$": r"\\subsubsection{\2}",  # 4th level title
+        r"^\s*(\\#){1}(?!\\#?)(.*?)$": r"\\chapter{\2}\n",  # 1st level title
+        r"^\s*(\\#){2}(?!\\#?)(.*?)$": r"\\section{\2}\n",  # 2nd level title
+        r"^\s*(\\#){3}(?!\\#?)(.*?)$": r"\\subsection{\2}\n",  # 3rd level title
+        r"^\s*(\\#){4}(?!\\#?)(.*?)$": r"\\subsubsection{\2}\n",  # 4th level title
         r"^\s*(\\#){5,}(?!\\#?)(.*?)$": r"\n\n\\textbf{\2}\n\n",  # 5th+ level title
     }
     title_unnumbered_sub = {
-        r"^\s*(\\#){1}(?!\\#?)(.*?)$": r"\\chapter*{\2}",  # 1st level title
-        r"^\s*(\\#){2}(?!\\#?)(.*?)$": r"\\section*{\2}",  # 2nd level title
-        r"^\s*(\\#){3}(?!\\#?)(.*?)$": r"\\subsection*{\2}",  # 3rd level title
-        r"^\s*(\\#){4}(?!\\#?)(.*?)$": r"\\subsubsection*{\2}",  # 4th level title
-        r"^\s*(\\#){5,}(?!\\#?)(.*?)$": r"\n\n\\textbf*{\2}\n\n",  # 5th+ level title
+        r"^\s*(\\#){1}(?!\\#?)(.*?)$": r"\\chapter*{\2}\n\\addcontentsline{toc}{chapter}{\2}\n",
+        r"^\s*(\\#){2}(?!\\#?)(.*?)$": r"\\section*{\2}\n\\addcontentsline{toc}{section}{\2}\n",
+        r"^\s*(\\#){3}(?!\\#?)(.*?)$": r"\\subsection*{\2}\n\\addcontentsline{toc}{subsection}{\2}\n",
+        r"^\s*(\\#){4}(?!\\#?)(.*?)$": r"\\subsubsection*{\2}\n\\addcontentsline{toc}{subsubsection}{\2}\n",
+        r"^\s*(\\#){5,}(?!\\#?)(.*?)$": r"\n\n\\textbf*{\2}\n\n",
     }
 
     @staticmethod
-    def convert(string, numbered=True):
+    def convert(string: str, unnumbered: bool):
         """
         perform the conversion: replace markdown titles by numbered or unnumbered LaTeX titles
+        :param string: the markdown representation of the string to convert
+        :param unnumbered: flag argument indicating that the LaTeX headers should be unnumbered
+        :return: processed string
         """
-        substitute = MDHeader.title_numbered_sub if numbered is True else MDHeader.title_unnumbered_sub
+        if unnumbered is True:
+            substitute = MDHeader.title_unnumbered_sub
+        else:
+            substitute = MDHeader.title_numbered_sub
         for k, v in substitute.items():
             string = re.sub(k, v, string, flags=re.M)
         return string
@@ -105,7 +111,7 @@ class MDQuote:
         """
         string = re.sub(
             r"^((>.+(\n|$))+)",
-            r"\\begin{displayquote} \n \1 \n \\end{displayquote}",
+            r"\\begin{quotation} \n \1 \n \\end{quotation}",
             string, flags=re.M
         ).replace(">", " ")
         return string
@@ -328,8 +334,8 @@ class MDReference:
                         texnote = r"\endnote{" + texnote + "}"
                     else:
                         texnote = r"\footnote{" + texnote + "}"
+                    string = string.replace(fnote[0], "")  # delete the markdown footnote
                     string = string.replace(pointer, texnote)  # add the \footnote or \endnote to string
-                    string = string.replace(fnote[1], "")  # delete the footnote key
                 else:
                     # delete the footnote body and pointers
                     string = string.replace(pointer, "")
@@ -390,7 +396,10 @@ class MDCleaner:
             string = string.replace(block, f"@@CODETOKEN{n}@@")
             codedict[f"@@CODETOKEN{n}@@"] = block
             n += 1
-        string = string.replace("\\", r"\backslash")
+
+        string = string.replace(r"{", r"\{")
+        string = string.replace(r"}", r"\}")
+        string = string.replace("\\", r"\textbackslash{}")
         string = string.replace(r"#", r"\#")
         string = string.replace("$", r"\$")
         string = string.replace("%", r"\%")
@@ -398,8 +407,6 @@ class MDCleaner:
         string = string.replace(r"~", r"\~")
         string = string.replace("_", r"\_")
         string = string.replace("^", r"\^")
-        string = string.replace(r"{", r"\{")
-        string = string.replace(r"}", r"\}")
 
         return string, codedict
 
@@ -420,6 +427,7 @@ class MDCleaner:
         string = re.sub(r"((?<!^ ) )+", " ", string, flags=re.M)
         string = re.sub(r"{\s+", r"{", string, flags=re.M)
         string = re.sub(r"\s+}", r"}", string, flags=re.M)
+        string = re.sub(r"\n{2,}", r"\n\n", string, flags=re.M)
 
         string = string.replace("USERRESERVEDTOKEN", "@@")
 
