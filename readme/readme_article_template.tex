@@ -13,18 +13,18 @@
 \usepackage{tocbibind}
 \usepackage{hyperref}
 
-\usepackage{color}
-\usepackage{fancyvrb}
-\usepackage{fvextra}
-\let\oldv\Verbatim
-\let\oldendv\endVerbatim
-\def\Verbatim{\par\setbox0\vbox\bgroup\oldv}
-\def\endVerbatim{\oldendv\egroup\fboxsep0pt \noindent\colorbox[gray]{0.9}{\usebox0}\par}
-
+\usepackage{listings}
+\lstset{%
+	basicstyle=\footnotesize\ttfamily,%
+	numbers=left,%
+	backgroundcolor=\color{lightgray},%
+	breaklines=true%
+}
 \usepackage[newfloat]{minted}
-\SetupFloatingEnvironment{listing}
+\SetupFloatingEnvironment{listing}{}
 \usemintedstyle{emacs}
-\setminted{linenos, breaklines, tabsize=4, bgcolor=gray}
+\setminted{linenos, breaklines, tabsize=4, bgcolor=lightgray}
+
 
 \usepackage[margin=2.5cm]{geometry}
 \usepackage{setspace}

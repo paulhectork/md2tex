@@ -13,18 +13,18 @@
 \usepackage{tocbibind}
 \usepackage{hyperref}
 
-\usepackage{color}
-\usepackage{fancyvrb}
-\usepackage{fvextra}
-\let\oldv\Verbatim
-\let\oldendv\endVerbatim
-\def\Verbatim{\par\setbox0\vbox\bgroup\oldv}
-\def\endVerbatim{\oldendv\egroup\fboxsep0pt \noindent\colorbox[gray]{0.9}{\usebox0}\par}
-
+\usepackage{listings}
+\lstset{%
+	basicstyle=\footnotesize\ttfamily,%
+	numbers=left,%
+	backgroundcolor=\color{lightgray},%
+	breaklines=true%
+}
 \usepackage[newfloat]{minted}
-\SetupFloatingEnvironment{listing}
-\usemintedstyle{manni}
-\setminted{linenos, breaklines, tabsize=4, bgcolor=gray}
+\SetupFloatingEnvironment{listing}{}
+\usemintedstyle{emacs}
+\setminted{linenos, breaklines, tabsize=4, bgcolor=lightgray}
+
 
 \usepackage[margin=2.5cm]{geometry}
 \usepackage{setspace}
@@ -56,7 +56,7 @@ expressions and translates them into TeX syntax. It has only been tested with la
 \item Translation from Markdown to TeX
 \item Creation of a complete and valid TeX document, either from a generic template or using your own template
 \item Reading Markdown from custom locations and writing a TeX file to a custom location
-\item Several options for extra customization: type of quotes inline quotes, use of footnotes or endnotes... 
+\item Several options for extra customization: type of quotes inline quotes, numbered or unnumbered headers, document classes... 
 \end{itemize}
 
 \par\noindent\rule{\linewidth}{0.4pt}
@@ -66,7 +66,7 @@ The advantage of having a script focused on Markdown to TeX conversion is that y
 and extra customization.
 \subsubsection{Requirements}
 
-The script relies on the \href{http://tug.ctan.org/macros/latex/contrib/minted/minted.pdf}{\texttt{minted}} package,
+The script relies on the \href{http://tug.ctan.org/macros/latex/contrib/minted/minted.pdf}{\texttt{minted}}\footnote{Website visited on 02.08.2022.} package,
 so this needs to be installed on your machine. This script has been tested on a Linux machine and should
 work on UNIX and affiliated systems. Theoritically, it should also run on Windows, although that has not
 been tested. You will need to tailor the below scripts if you use Windows.
@@ -143,7 +143,7 @@ parameters are optional.
  \item this argument must be used in conjunction with \texttt{-c} for an actual template to be used.
 \item a path to an existing template must be provided.
 \item this template must contain the string \texttt{@@BODYTOKEN@@}: this token will be replaced by the contents of the 	 converted Markdown file.
-\item the document class can also be defined in the document by the CLI: 	 in the template's preamble, write \texttt{documentclass\textbackslash{}{article\textbackslash{}}}.
+\item the document class can also be defined in the document by the CLI: 	 in the template's preamble, write \texttt{documentclass\{article\}}.
 \end{itemize}
 \item \textbf{\texttt{-d}, \texttt{--document-class}}: this argument indicates the class of the final TeX document. it indicates wether to process the Markdown file as a LaTeX \texttt{book} or as an \texttt{article}.
 \begin{itemize} 
@@ -151,17 +151,13 @@ parameters are optional.
 \item if used with a custom TeX template (see \texttt{-c} and \texttt{-t}), the template must contain an \texttt{article} 	 in the preamble where the document class is specified so that the TeX document class can actually change.
 \item in fact, this argument only impacts the headers used in the TeX template.
 \end{itemize}
-\item \textbf{\texttt{-u}, \texttt{--unnumbered-headers}}: if this argument is provided, the TeX headers (\texttt{\textbackslash{}chaper}, \texttt{section}...) will be unnumbered.
+\item \textbf{\texttt{-u}, \texttt{--unnumbered-headers}}: if this argument is provided, the TeX headers (\texttt{\textbackslash{}chatper}, \texttt{section}...) will be unnumbered.
 \begin{itemize} 
  \item by default, the headers are numbered.
 \end{itemize}
 \item \textbf{\texttt{-f}, \texttt{--french-quote}}: if this argument is provided, anglo-saxon inline quotes will be replaced by french quotes using the \texttt{\textbackslash{}enquote} command.
 \begin{itemize} 
- \item defaults to False: anglo-saxon quotes are used.
-\end{itemize}
-\item \textbf{\texttt{-e}, \texttt{--endnote}}: if this argument is used, Markdown footnotes will be rendered as TeX \texttt{\textbackslash{}endnote\textbackslash{}{\textbackslash{}}}.
-\begin{itemize} 
- \item if not provided, then the Markdown footnotes will be rendered as actual \texttt{\textbackslash{}footnote\textbackslash{}{\textbackslash{}}}. 
+ \item defaults to False: anglo-saxon quotes are used. 
 \end{itemize}
 \end{itemize}
 \subsubsection{Command line help}
@@ -311,15 +307,15 @@ All items must be \textbf{as indented than the first list item} or more. the ind
 will be removed before processing that list. This means that \textit{the first example} will result in the same
 result as \textit{the second}.
 
-\begin{Verbatim}[h!,breaklines=true]
+\begin{lstlisting}
 - list item with no leading space
 - same here
-\end{Verbatim}
+\end{lstlisting}
 
-\begin{Verbatim}[h!,breaklines=true]
+\begin{lstlisting}
   - list item with two leading spaces
   - same here, still a valid list
-\end{Verbatim}
+\end{lstlisting}
 
 All indentation levels must be a multiple of the leading whitespaces of the first nested item. If the first nested 
 list item is indented with 4 whitespaces, all nested items must be indented with a multiple of 4 spaces. For example,
@@ -329,7 +325,7 @@ The above two rules cause the script to exit with an error message pointing to t
 in keeping with LaTeX and markdown logic, a list item can't skip a nesting level (you cannot go from an item in a list
 to an item in a list in a list). This will \textbf{not} stop the script, the indentation will just be reset automatically.
 
-\begin{Verbatim}[h!,breaklines=true]
+\begin{lstlisting}
 - this is an item at level 0
   - this is an item at level 1; the indentation is set as 2 whitespaces
   - same here; level 1.
@@ -337,7 +333,7 @@ to an item in a list in a list). This will \textbf{not} stop the script, the ind
    however, its nesting level will be reset from level 3 to level 2 to avoid skipping
    a nesting level
   - this item is at level 1
-\end{Verbatim}
+\end{lstlisting}
 \subsubsection{Technically, how does it work ?}
 
 \begin{itemize}
@@ -352,39 +348,39 @@ to an item in a list in a list). This will \textbf{not} stop the script, the ind
 
 \noindent{}\textbf{Valid lists}
 
-\begin{Verbatim}[h!,breaklines=true]
+\begin{lstlisting}
 - item at level 0
 - item at level 0
   - item at level 1. here, a 2-whitespace indentation is defined for the list.
    - item at level 2, with 4 leading spaces.
 - item at level 0
-\end{Verbatim}
+\end{lstlisting}
 
-\begin{Verbatim}[h!,breaklines=true]
+\begin{lstlisting}
    - item at level 0
    - item at level 0
-\end{Verbatim}
+\end{lstlisting}
 
-\begin{Verbatim}[h!,breaklines=true]
+\begin{lstlisting}
 - item at level 0
    - item at level 1. for this list, the indentation is set to 4 spaces.
    - visually, this item is at level 3 (12 leading spaces), but will be reindented to 2 spaces.
    - item at level 1.
-\end{Verbatim}
+\end{lstlisting}
 
 \noindent{}\textbf{Invalid lists}
 
-\begin{Verbatim}[h!,breaklines=true]
+\begin{lstlisting}
   - item at level 0
   - item at level 0
 - this will cause the script to exit: the item is less indented than the first item.
-\end{Verbatim}
+\end{lstlisting}
 
-\begin{Verbatim}[h!,breaklines=true]
+\begin{lstlisting}
 - item at level 0
 	- indentation is set at 4 spaces
 	 - here, there are 6 spaces. the indentation is incoherent and the script stops.
-\end{Verbatim}
+\end{lstlisting}
 
 \par\noindent\rule{\linewidth}{0.4pt}
 \subsection{License and credits}

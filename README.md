@@ -11,7 +11,7 @@ expressions and translates them into TeX syntax. It has only been tested with la
 - Creation of a complete and valid TeX document, either from a generic template or using your own 
   template
 - Reading Markdown from custom locations and writing a TeX file to a custom location
-- Several options for extra customization: type of quotes inline quotes, use of footnotes or endnotes...
+- Several options for extra customization: type of quotes inline quotes, numbered or unnumbered headers, document classes...
 
 ---
 
@@ -21,10 +21,12 @@ The advantage of having a script focused on Markdown to TeX conversion is that y
 and extra customization.
 
 ### Requirements
-The script relies on the [`minted`](http://tug.ctan.org/macros/latex/contrib/minted/minted.pdf) package,
+The script relies on the [`minted`](http://tug.ctan.org/macros/latex/contrib/minted/minted.pdf)[^1] package,
 so this needs to be installed on your machine. This script has been tested on a Linux machine and should
 work on UNIX and affiliated systems. Theoritically, it should also run on Windows, although that has not
 been tested. You will need to tailor the below scripts if you use Windows.
+
+[^1]: Website visited on 02.08.2022.
 
 ### Automated installation (MacOS/GNU-Linux)
 An installation shell script has been written to make things easier.
@@ -88,14 +90,12 @@ parameters are optional.
 	- if used with a custom TeX template (see `-c` and `-t`), the template must contain an `@@DOCUMENTCLASSTOKEN@@`
 	  in the preamble where the document class is specified so that the TeX document class can actually change.
 	- in fact, this argument only impacts the headers used in the TeX template.
-- **`-u`, `--unnumbered-headers`**: if this argument is provided, the TeX headers (`\chaper`, `section`...)
+- **`-u`, `--unnumbered-headers`**: if this argument is provided, the TeX headers (`\chatper`, `section`...)
   will be unnumbered.
 	- by default, the headers are numbered.
 - **`-f`, `--french-quote`**: if this argument is provided, anglo-saxon inline quotes will be replaced by
   french quotes using the `\enquote` command.
 	- defaults to False: anglo-saxon quotes are used.
-- **`-e`, `--endnote`**: if this argument is used, Markdown footnotes will be rendered as TeX `\endnote{}`.
-	- if not provided, then the Markdown footnotes will be rendered as actual `\footnote{}`.
 
 ### Command line help
 ```bash

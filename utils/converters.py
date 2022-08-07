@@ -257,7 +257,7 @@ class MDCode:
 
     contains
     --------
-    block_code(): create a latex minted or listings env from a md block of code
+    block_code(): create a latex minted or lstlisting env from a md block of code
     """
     @staticmethod
     def block_code(string: str):
@@ -270,7 +270,7 @@ class MDCode:
         - if it is supported, a `minted` env is created inside a `listing` 
           env; the code is included in this env and will be coloured in latex
         - if no language is supplied in the markdown file, then the whole block
-          is included as is in a `listing` env. 
+          is included as is in a `lstlisting` env.
         :param string: the string representation of the markdown file
         :return: the updated string representation of a markdown file
         """
@@ -298,13 +298,13 @@ class MDCode:
                 code = env.replace("@@LANGTOKEN@@", lang).replace("@@CODETOKEN@@", code)  # add code to the latex env
 
             # if the langage is not supported (or if the characters after the opening ```
-            # aren't a language), only create a verbatim environment and reinject the code
+            # aren't a language), only create a lstlisting environment and reinject the code
             # in it
             else:
                 env = r"""
-\begin{Verbatim}[h!,breaklines=true]
+\begin{lstlisting}
 @@CODETOKEN@@
-\end{Verbatim}
+\end{lstlisting}
                 """  # env to add the code to
                 code = env.replace("@@CODETOKEN@@", re.sub(r"```", "", code, flags=re.M))  # reinject code block to env
 
@@ -314,18 +314,18 @@ class MDCode:
 
 
 class MDReference:
-    """
+    r"""
     substitutions for references inside a markdown document.
     currently only for footnote substitutions
 
     contains
     --------
-    footnote(): replace markdown footnotes (`[\^\d+]`) into latex `\footnote{}` or `\endnote{}`
+    footnote(): replace markdown footnotes (`[\^\d+]`) into latex `\footnote{}`
     """
     @staticmethod
-    def footnote(string: str, endnote: bool):
+    def footnote(string: str):
         r"""
-        translate a markdown footnode `[^\d+]` to a latex footnote (`\footnote{}` or `\endnote{}`)
+        translate a markdown footnode `[^\d+]` to a latex footnote (`\footnote{}`)
 
         the structure of a markdown footnote:
         - This is the body of the text [^1] <-- body of the text
@@ -336,13 +336,11 @@ class MDReference:
         footnote and add it to a `\footnote{}`
 
         :param string: the string representation of a markdown file
-        :param endnote: a boolean. if true, use `\endnote{}` instead of `\footnote{}`
-        :return: the updated string representation of a markdown file
         """
         footnotes = re.finditer(r"\[\\\^\d+\](?![ \t]*:)", string, flags=re.M)
         for match in footnotes:
             try:
-                pointer = match[0]  # extract the footnote pointer (the pointer to the actual footnote
+                pointer = match[0]  # extract the footnote pointer (the pointer to the actual footnote)
                 key = re.search(r"\d+", pointer)[0]  # extract the footnote n°
                 fnote = re.search(
                     fr"(\[\\\^%s\]:)(.+\n?)*" % key,
@@ -351,12 +349,9 @@ class MDReference:
                 texnote = re.sub(r"\s+", " ", fnote[0].replace(fnote[1], ""))  # remove the pointer + normalize space
 
                 if not re.search("^\s*$", texnote):  # if the note isn't empty; else, delete it
-                    if endnote is True:
-                        texnote = r"\endnote{" + texnote + "}"
-                    else:
-                        texnote = r"\footnote{" + texnote + "}"
+                    texnote = r"\footnote{" + texnote + "}"
                     string = string.replace(fnote[0], "")  # delete the markdown footnote
-                    string = string.replace(pointer, texnote)  # add the \footnote or \endnote to string
+                    string = string.replace(pointer, texnote)  # add the \footnote to string
                 else:
                     # delete the footnote body and pointers
                     string = string.replace(pointer, "")
@@ -395,7 +390,7 @@ class MDCleaner:
 
         this function is used after `block_code()` to avoid replacing
         special characters that should be interpreted verbatim by LaTeX.
-        to escape all `minted` and `Verbatim` code we use a dict that stores all
+        to escape all `minted` and `lstlisting` code we use a dict that stores all
         these blocks of code.
 
         :param string: the string representation of a markdown file
@@ -409,7 +404,7 @@ class MDCleaner:
         # for that, store all code blocks in a dict, replace them in `string`
         # with a special token. this token uses `+` because they aren't LaTeX
         # special characters
-        codematch = re.finditer(r"\\begin\{(listing|Verbatim)}(.|\n)*?\\end\{(listing|Verbatim)}", string, flags=re.M)
+        codematch = re.finditer(r"\\begin\{(listing|lstlisting)}(.|\n)*?\\end\{(listing|lstlisting)}", string, flags=re.M)
         n = 0
         codedict = {}
         for match in codematch:
@@ -420,7 +415,8 @@ class MDCleaner:
 
         string = string.replace(r"{", r"\{")
         string = string.replace(r"}", r"\}")
-        string = string.replace("\\", r"\textbackslash{}")
+        # string = re.sub("(?<![^\]]\[)\^", r"\^", string, flags=re.M)
+        string = re.sub(r"\\(?![\{\}])", r"\\textbackslash{}", string, flags=re.M)
         string = string.replace(r">", r"\textgreater{}")
         string = string.replace(r"#", r"\#")
         string = string.replace("$", r"\$")
@@ -428,7 +424,8 @@ class MDCleaner:
         string = string.replace(r"$", r"\&")
         string = string.replace(r"~", r"\~")
         string = string.replace("_", r"\_")
-        string = string.replace("^", r"\^")
+        string = re.sub("\^", r"\\^", string, flags=re.M)
+        # print(string)
 
         return string, codedict
 

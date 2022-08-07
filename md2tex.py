@@ -26,10 +26,6 @@ from utils.errors_warnings import InputException, Warnings
               help="optional. if provided, the Markdown inline quotes will be converted"
                    " as french quotes `\\enquote{}` instead of anglo-saxon quotes."
                    + "defaults to `False`: quotes are translated as anglo-saxon quotes.")
-@click.option("-e", "--endnote", "endnote", is_flag=True, default=False,
-              help="optional. if provided, the Markdown footnotes will be translated as TeX endnotes (`\\endnote{}`)"
-                   + "instead of the usual `\\footnote{}`."
-                   + "defaults to `False`: Markdown footnotes are translated as TeX footnotes.")
 @click.option("-u", "--unumbered-headers", "unnumbered", is_flag=True, default=False,
               help="optional. if provided, Markdown headers will be translated as TeX unnumbered headers/sections"
                    + "defaults to False: the headers are numbered by default.")
@@ -42,7 +38,6 @@ def md2tex(
         tex=False,
         template="utils/template.tex",
         french_quote=False,
-        endnote=False,
         unnumbered=False,
         document_class="article"
 ):
@@ -63,8 +58,6 @@ def md2tex(
                      able to append the TeX body to the template.
     :param french_quote: whether to translate "" and '' as english tex quotes (``")
                           or french quotes (\enquote{})
-    :param endnote: translate the markdown footnotes (`[^\d+]`) as latex `\endnote{}`
-                    instead of `\footnote`
     :param unnumbered: wether to convert headers as numbered chapters/sections (`\chapter{}`)
                      or as unnumbered ones (`\chapter*{}`). defaults to False:
                      the headers are numbered by default.
@@ -109,7 +102,7 @@ def md2tex(
     data = MDQuote.block_quote(data)
     data = MDList.unordered_l(data)
     data = MDList.ordered_l(data)
-    data = MDReference.footnote(data, endnote)
+    data = MDReference.footnote(data)
     data = MDHeader.convert(data, unnumbered, document_class)
 
     # "simple" replacements. simple_sub contains regexes as keys
