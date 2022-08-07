@@ -17,18 +17,20 @@ md2tex README.md -c -t ./readme/readme_article_template.tex -o ./readme/README.t
 md2tex README.md -c -t ./readme/readme_book_template.tex -o ./examples/README_book.tex -d book -u -f
 # complete document of class article with numbered headers
 md2tex README.md -c -t ./readme/readme_article_template.tex -o ./examples/README_article_numbered.tex
-# complete document of class book with default template and numbered headers
+# complete document of class article with default template and numbered headers
 md2tex README.md -c -o ./examples/README_article_default_template_numbered.tex
+# complete document of class book with default params
+md2tex README.md -c -o ./examples/README_book_default_template.tex -d book
 # base transformation: partial file (body only) with anglo-saxon quotes and numbered headers
 md2tex README.md -o ./examples/README_partial_base.tex  # this one won't be compiled
 
 # compile all complete tex files
-cd readme && xelatex -synctex=1 -shell-escape -interaction=nonstopmode -8bit README.tex
+cd readme && xelatex -synctex=1 -shell-escape -interaction=nonstopmode -8bit README.tex > /dev/null
 cd ../examples
 for f in *.tex ; do
-  echo "$f"
+  echo "xelatex is compiling $f"
 	if [[ "$f" != "README_partial_base.tex" ]] && [[ "$f" =~ ^.*\.tex$ ]]; then
-		xelatex -synctex=1 -shell-escape -interaction=nonstopmode -8bit "$f"
+		xelatex -synctex=1 -shell-escape -interaction=nonstopmode -8bit "$f" > /dev/null
 	fi;
 done;
 

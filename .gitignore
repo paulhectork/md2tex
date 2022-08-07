@@ -3,6 +3,7 @@ env_m2t/*
 env/*
 img/lsp*
 output/*
+input/*
 .idea
 
 ## aux TeX files

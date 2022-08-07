@@ -21,9 +21,10 @@
 \def\Verbatim{\par\setbox0\vbox\bgroup\oldv}
 \def\endVerbatim{\oldendv\egroup\fboxsep0pt \noindent\colorbox[gray]{0.9}{\usebox0}\par}
 
-\usepackage{minted}
+\usepackage[newfloat]{minted}
+\SetupFloatingEnvironment{listing}
 \usemintedstyle{emacs}
-\setminted{linenos, breaklines, tabsize=4, bgcolor=lightgray}
+\setminted{linenos, breaklines, tabsize=4, bgcolor=gray}
 
 \usepackage[margin=2.5cm]{geometry}
 \usepackage{setspace}
@@ -36,7 +37,7 @@
 
 	\begin{titlepage}
 		\begin{center}
-			\bigskip
+			\hspace{0pt}
 
 			\vfill
 
@@ -53,7 +54,6 @@
 
 				August 2022
 			\end{large}
-
 		\end{center}
 	\end{titlepage}
 

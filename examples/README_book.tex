@@ -21,9 +21,10 @@
 \def\Verbatim{\par\setbox0\vbox\bgroup\oldv}
 \def\endVerbatim{\oldendv\egroup\fboxsep0pt \noindent\colorbox[gray]{0.9}{\usebox0}\par}
 
-\usepackage{minted}
+\usepackage[newfloat]{minted}
+\SetupFloatingEnvironment{listing}
 \usemintedstyle{emacs}
-\setminted{linenos, breaklines, tabsize=4, bgcolor=lightgray}
+\setminted{linenos, breaklines, tabsize=4, bgcolor=gray}
 
 \usepackage[margin=2.5cm]{geometry}
 \usepackage{setspace}
@@ -36,7 +37,7 @@
 
 	\begin{titlepage}
 		\begin{center}
-			\bigskip
+			\hspace{0pt}
 
 			\vfill
 
@@ -53,7 +54,6 @@
 
 				August 2022
 			\end{large}
-
 		\end{center}
 	\end{titlepage}
 
@@ -61,108 +61,306 @@
 \chapter*{\texttt{md2tex} - a CLI to convert Markdown to TeX}
 \addcontentsline{toc}{chapter}{\texttt{md2tex} - a CLI to convert Markdown to TeX}
 
-\texttt{md2tex} is a simple but customizable markdown to TeX converter. rather than using fancy object oriented 
-libraries, it locates elements of markdown syntax using regular expressions and translates them into TeX syntax.
-it has only been tested with latin script so far. still a work in progress.
+\texttt{md2tex} is a simple but customizable markdown to TeX converter inspired by XSLT and functionnal programming. 
+Rather than using fancy object oriented libraries, it locates elements of Markdown syntax using regular 
+expressions and translates them into TeX syntax. It has only been tested with latin script so far.
 
 \par\noindent\rule{\linewidth}{0.4pt}
 \section*{Features}
 \addcontentsline{toc}{section}{Features}
 
 \begin{itemize}
-\item translation from markdown to TeX
-\item creation of a complete and valid TeX document, either from a generic template or using your own template
-\item saving to a custom file(path)
-\item several options for extra customization 
+\item Translation from Markdown to TeX
+\item Creation of a complete and valid TeX document, either from a generic template or using your own template
+\item Reading Markdown from custom locations and writing a TeX file to a custom location
+\item Several options for extra customization: type of quotes inline quotes, use of footnotes or endnotes... 
 \end{itemize}
+
+\par\noindent\rule{\linewidth}{0.4pt}
+\section*{Commands / How to}
+\addcontentsline{toc}{section}{Commands / How to}
+
+The advantage of having a script focused on Markdown to TeX conversion is that you can get a lot of fine tuning
+and extra customization.
+\subsection*{Requirements}
+\addcontentsline{toc}{subsection}{Requirements}
+
+The script relies on the \href{http://tug.ctan.org/macros/latex/contrib/minted/minted.pdf}{\texttt{minted}} package,
+so this needs to be installed on your machine. This script has been tested on a Linux machine and should
+work on UNIX and affiliated systems. Theoritically, it should also run on Windows, although that has not
+been tested. You will need to tailor the below scripts if you use Windows.
+\subsection*{Automated installation (MacOS/GNU-Linux)}
+\addcontentsline{toc}{subsection}{Automated installation (MacOS/GNU-Linux)}
+
+An installation shell script has been written to make things easier.
+Simply clone the repo and launch the install !
+
+\begin{listing}[h!]
+   \begin{minted}{bash}
+git clone https://github.com/paulhectork/md2tex.git # clone the repo
+cd md2tex # move to the directory
+bash install.sh # can also be used with other shells: zsh, ash...
+
+   \end{minted}
+\end{listing}
+\subsection*{Manual install}
+\addcontentsline{toc}{subsection}{Manual install}
+
+If the above method doesn't work, a manual installation is just as easy:
+
+\begin{listing}[h!]
+   \begin{minted}{bash}
+git clone https://github.com/paulhectork/md2tex.git # clone the repo
+cd md2tex # move to the directory
+python3 -m venv env # create virtual env
+source env/bin/activate # source it
+pip install -r requirements.txt # install requirements
+pip install --editable . # build the package
+
+   \end{minted}
+\end{listing}
+\subsection*{Base functionning}
+\addcontentsline{toc}{subsection}{Base functionning}
+
+This CLI should be used from the \texttt{md2tex} directory.
+
+\begin{listing}[h!]
+   \begin{minted}{bash}
+source env/bin/activate # get the proper env
+md2tex path/to/markdown/file.md --options
+
+   \end{minted}
+\end{listing}
+\subsection*{Arguments and options}
+\addcontentsline{toc}{subsection}{Arguments and options}
+\subsubsection*{Argument}
+\addcontentsline{toc}{subsubsection}{Argument}
+
+The only \textbf{compulsory argument} is the path to the markdown file that needs to be processed.
+
+\begin{itemize}
+\item The file must finish with \texttt{.md} so that we're sure that a markdown file is being processed. 
+\end{itemize}
+\subsubsection*{Optional parameters}
+\addcontentsline{toc}{subsubsection}{Optional parameters}
+
+As you can see below, there quite a few possibilities for fine-tuning. All of the below
+parameters are optional.
+
+\begin{itemize}
+\item \textbf{\texttt{o}, \texttt{-output-path}}: give a specific path and filename to write the \texttt{.tex} file to?
+\begin{itemize} 
+ \item if none is provided, the output path defaults to \texttt{md2tex/output/input\_filename.tex}
+\item if the output path contain directories that do not exist, the output will not be 	 written. Directories must be created manually beforehand.
+\begin{itemize} 
+ \item if the extension of the output file is not \texttt{.tex}, a \texttt{.tex} extension will be added to the filename.
+\end{itemize}
+\end{itemize}
+\item \textbf{\texttt{-c}, \texttt{--complete-tex-file}}: if provided, a complete TeX file will be created, with preamble and table of contents. 
+\begin{itemize} 
+ \item the default template used is \texttt{utils/template.tex}. For a custom template, see \texttt{-t} below.
+\item if not provided, only the body of the Markdown file will be converted. It will need to be included 	 in another file with a premable.
+\end{itemize}
+\item \textbf{\texttt{-t}, \texttt{--custom-tex-template}}: the path to a custom TeX template to build a complete document from, instead of the default template \texttt{utils/template.tex}.
+\begin{itemize} 
+ \item this argument must be used in conjunction with \texttt{-c} for an actual template to be used.
+\item a path to an existing template must be provided.
+\item this template must contain the string \texttt{@@BODYTOKEN@@}: this token will be replaced by the contents of the 	 converted Markdown file.
+\item the document class can also be defined in the document by the CLI: 	 in the template's preamble, write \texttt{documentclass\textbackslash{}{book\textbackslash{}}}.
+\end{itemize}
+\item \textbf{\texttt{-d}, \texttt{--document-class}}: this argument indicates the class of the final TeX document. it indicates wether to process the Markdown file as a LaTeX \texttt{book} or as an \texttt{article}.
+\begin{itemize} 
+ \item defaults to \texttt{article}.
+\item if used with a custom TeX template (see \texttt{-c} and \texttt{-t}), the template must contain an \texttt{book} 	 in the preamble where the document class is specified so that the TeX document class can actually change.
+\item in fact, this argument only impacts the headers used in the TeX template.
+\end{itemize}
+\item \textbf{\texttt{-u}, \texttt{--unnumbered-headers}}: if this argument is provided, the TeX headers (\texttt{\textbackslash{}chaper}, \texttt{section}...) will be unnumbered.
+\begin{itemize} 
+ \item by default, the headers are numbered.
+\end{itemize}
+\item \textbf{\texttt{-f}, \texttt{--french-quote}}: if this argument is provided, anglo-saxon inline quotes will be replaced by french quotes using the \texttt{\textbackslash{}enquote} command.
+\begin{itemize} 
+ \item defaults to False: anglo-saxon quotes are used.
+\end{itemize}
+\item \textbf{\texttt{-e}, \texttt{--endnote}}: if this argument is used, Markdown footnotes will be rendered as TeX \texttt{\textbackslash{}endnote\textbackslash{}{\textbackslash{}}}.
+\begin{itemize} 
+ \item if not provided, then the Markdown footnotes will be rendered as actual \texttt{\textbackslash{}footnote\textbackslash{}{\textbackslash{}}}. 
+\end{itemize}
+\end{itemize}
+\subsection*{Command line help}
+\addcontentsline{toc}{subsection}{Command line help}
+
+\begin{listing}[h!]
+   \begin{minted}{bash}
+md2tex --help
+
+   \end{minted}
+\end{listing}
+
+\par\noindent\rule{\linewidth}{0.4pt}
+\section*{Examples}
+\addcontentsline{toc}{section}{Examples}
+
+Output TeX files and the PDFs (using \texttt{XeLaTeX}) can be seen in the \texttt{readme/} and \texttt{examples/} directory.
+
+\begin{itemize}
+\item the \texttt{readme/} directory contains the canonical TeX and PDF documentation, produced by processing this README file.
+\item the \texttt{examples/} directory contains additional examples, including different parameters used to process this file.
+\item the script \texttt{readme\_conversion.sh} allows to run a series of conversions and compilation of this file into different TeX and PDF files. 
+\end{itemize}
+
+\textbf{Example 1} - the canonical \texttt{README.tex} file in the \texttt{README} dir:
+
+\begin{itemize}
+\item a complete document is created (\texttt{-c})
+\item it uses the custom template (\texttt{-t}) \texttt{./readme/readme\_article\_template.tex}
+\item the output is written (\texttt{-o}) to \texttt{./readme/README.tex}
+\item the document created is an article (\texttt{-d article})
+\item the document uses unnumbered headers (\texttt{-u}) and french quotes (\texttt{-f}) 
+\end{itemize}
+
+\begin{listing}[h!]
+   \begin{minted}{bash}
+md2tex README.md -c -t ./readme/readme_article_template.tex -o ./readme/README.tex -d article -u -f
+
+   \end{minted}
+\end{listing}
+
+\textbf{Example 2} - a partial TeX file to a custom output (\texttt{-o ./examples/README\_partial\_base.tex}) with default params
+
+\begin{listing}[h!]
+   \begin{minted}{bash}
+md2tex README.md -o ./examples/README_partial_base.tex
+
+   \end{minted}
+\end{listing}
+
+\textbf{Example 3} - a complete document of class \texttt{book} using a custom template with unnumbered headers and french quotes
+
+\begin{listing}[h!]
+   \begin{minted}{bash}
+md2tex README.md -c -t ./readme/readme_book_template.tex -o ./examples/README_book.tex -d book -u -f
+
+   \end{minted}
+\end{listing}
+
+\textbf{Example 4} - a complete document of class \texttt{article} with a custom template and numbered (default) headers
+
+\begin{listing}[h!]
+   \begin{minted}{bash}
+md2tex README.md -c -t ./readme/readme_article_template.tex -o ./examples/README_article_numbered.tex
+
+   \end{minted}
+\end{listing}
+
+\textbf{Example 5} - a complete document of class \texttt{book} with default template and numbered headers
+
+\begin{listing}[h!]
+   \begin{minted}{bash}
+md2tex README.md -c -o ./examples/README_article_default_template_numbered.tex
+
+   \end{minted}
+\end{listing}
+
+\textbf{Example 6} - a complete document of class \texttt{article} with default template and default params
+
+\begin{listing}[h!]
+   \begin{minted}{bash}
+md2tex README.md -c -o ./examples/README_book_default_template.tex -d book
+
+   \end{minted}
+\end{listing}
 
 \par\noindent\rule{\linewidth}{0.4pt}
 \section*{Markdown syntax}
 \addcontentsline{toc}{section}{Markdown syntax}
-
-\textbf{currently supported}
-
-\begin{itemize}
-\item line breaks: paragraph changes using \texttt{\textbackslash{}n\textbackslash{}n}, \texttt{<br} and \texttt{<br/}
-\item \textbf{bold}, \textit{italic} and \texttt{inline code} text. \textbf{warning}:
-\begin{itemize} 
- \item only bold and italics made using \textbackslash{}* will be translated
-\end{itemize}
-\item block quotes (lines beginning with \texttt{}). \textbf{warning}: only non-nested block quotes -- or the outer level of a nested block quote -- will be rendered.
-\item multiline code; if possible, the code is colored thanks to \texttt{minted}
-\item ordrered and unordered lists, including nested lists. \textbf{warning} : 
-\begin{itemize} 
- \item this CLI is made to work with as-messy-as-possible data; if your lists are messy (using different levels of space...), it will create messy nested lists too.
-\item unordered lists will only be converted if they begin with \texttt{-}. any other list token will be ignored.
-\end{itemize}
-\item titles and different title levels
-\item images
-\item URLs
-\item inline quotes : french and english style, nested quotes.
-\item footnotes ; \textbf{warning}: loose footnotes (references in the body that point to nothing or footnotes that point to nothing in the body) will be deleted. 
-\end{itemize}
-
-\textbf{unsupported}
+\subsection*{Currently supported}
+\addcontentsline{toc}{subsection}{Currently supported}
 
 \begin{itemize}
-\item markdown tables
-\item end-of-line backslashes to mark a line break
-\item strikethrough
-\item emojis
-\item tasks lists
-\item definition lists
-\item text blocks inside lists. they will be processed as the continuation of a list item 
+\item Line breaks: paragraph changes using \texttt{\textbackslash{}n\textbackslash{}n}, \texttt{<br\textgreater{}} and \texttt{<br/\textgreater{}}
+\item Different styles of text: \textbf{bold}, \textit{italic} and \texttt{inline code}. \textbf{Warning}:
+\begin{itemize} 
+ \item only bold and italics made using asterisks will be translated.
+\end{itemize}
+\item Block quotes (lines beginning with \texttt{\textgreater{}}). \textbf{Warning}: only non-nested block quotes -- or the outer level of a nested block quote -- will be rendered.
+\item Multiline code; if possible, the code is colored using \texttt{minted}. Indentation levels are \textbf{always} respected within multiline code.
+\item Ordrered and unordered lists, including nested lists. \textbf{Warning}:
+\begin{itemize} 
+ \item To be processed, all indentation levels must be a multiplier of the indentation of the first indented item. See below for details on how nested lists are handled.
+\item Unordered lists will only be converted if they begin with \texttt{-}. any other list token will be ignored.
+\item The only list token replaced in ordered lists is \texttt{\textbackslash{}d+.} (digits followed by a point: \texttt{1.}). If an other list token is used (a letter...), the numbered list won't be processed. If additional tokens are added (for nested lists: \texttt{1. a.}), the list will be processed, but the second token (\texttt{a.}) will not be deleted. This is because the use of additional tokens is specific to the Markdown interpreter used.
+\end{itemize}
+\item Titles and different title levels
+\item Images
+\item URLs, both in text and as Markdown hyperlinks.
+\item Inline quotes : french and english style, nested quotes.
+\item Footnotes. \textbf{Warning}: loose footnotes (references in the body that point to nothing or footnotes that point to nothing in the body) will be deleted. 
+\end{itemize}
+\subsection*{Currently unsupported}
+\addcontentsline{toc}{subsection}{Currently unsupported}
+
+\begin{itemize}
+\item Markdown tables
+\item Strikethrough
+\item Emojis
+\item Tasks lists
+\item Definition lists
+\item Text blocks inside lists will be processed as the continuation of a list item 
 \end{itemize}
 
 \par\noindent\rule{\linewidth}{0.4pt}
 \section*{Things that will mess with the output}
 \addcontentsline{toc}{section}{Things that will mess with the output}
 
+The things in the list below will either cause the script to exit or produce a messy output.
+
 \begin{itemize}
-\item poorly formed markdown
-\item things that are currently not supported
-\item unnumbered lists made using non-standard markdown syntax (lists not beginning with \texttt{-}...)
-\item numbered lists using additional numbering keys, such as \texttt{1. a}. in this case, \texttt{1.} will be deleted and \texttt{a} will be kept, so the TeX file will contain double numbering (the \texttt{enumerate} numbering and this numbering key)
-\item highly nested lists are not supported by default in LaTeX, but this can be changed in your preamble
-\item multiple footnotes with the same key; for the footnote restructuration to work, there must be unique footnote numbers and only one note per footnote number.
-\item loose footnotes that point to nothing will be deleted 
+\item Poorly formed Markdown. If a list is not properly formed, the script will exit.
+\item Using things that are currently not supported.
+\item Incoherent use of header levels (\texttt{\#}, \texttt{\#\#}...) will be processed and render a valid document, but it will mess with the appearence of the TeX file and of the table of contents, especially if the headers are numbered.
+\item Unnumbered lists made using non-standard markdown syntax (lists not beginning with \texttt{-}...). These will simply not be matched.
+\item Numbered lists using additional numbering keys, such as \texttt{1. a}. These will be matched, but in this case, \texttt{1.} will be deleted and replaced by TeX syntax; \texttt{a} will be kept, so the TeX file will contain double numbering (the TeX numbering and this second numbering key)
+\item Highly nested lists are not supported by default in LaTeX, but this can be changed in your preamble.
+\item Multiple footnotes with the same key; for the footnote processing to work, there must be unique footnote numbers and only one note per footnote number.
+\item Loose footnotes that point to nothing will be deleted. 
 \end{itemize}
 
-clean your file first ! you can also make the bulk of the translation using this cli and fine tune your \texttt{.tex} 
+Clean your file first ! You can also make the bulk of the translation using this cli and fine tune your \texttt{.tex} 
 file later on.
 
 \par\noindent\rule{\linewidth}{0.4pt}
 \section*{About nested lists and visual indentation}
 \addcontentsline{toc}{section}{About nested lists and visual indentation}
 
-list nesting and visual indentation is a bit of a pickle, so here's an explanation of how
+List nesting and visual indentation is a bit of a pickle, so here's an explanation of how
 the indentation is processed and what constitutes a valid list for this tool.
+\subsection*{What is a valid list?}
+\addcontentsline{toc}{subsection}{What is a valid list?}
 
-\textbf{what is a valid list?}
+All items must be \textbf{as indented than the first list item} or more. the indentation level of the first item
+will be removed before processing that list. This means that \textit{the first example} will result in the same
+result as \textit{the second}.
 
-\begin{itemize}
-\item all items must be \textbf{as indented than the first list item} or more. the indentation level of the first item will be removed before processing that list. this means that the first example will result in the same result as the second 
-\end{itemize}
-
-\begin{Verbatim}[breaklines=true]
+\begin{Verbatim}[h!,breaklines=true]
 - list item with no leading space
 - same here
 \end{Verbatim}
 
-\begin{Verbatim}[breaklines=true]
+\begin{Verbatim}[h!,breaklines=true]
   - list item with two leading spaces
   - same here, still a valid list
 \end{Verbatim}
 
-\begin{itemize}
-\item all indentation levels must be a multiple of the leading spaces of the first nested item. if the first nested list item is indented with 4 whitespaces, all nested items must be indented with a multiple of 4 spaces. for example, a list item can't be indented with 3 spaces while another one is indented with 4 spaces. 
-\end{itemize}
+All indentation levels must be a multiple of the leading whitespaces of the first nested item. If the first nested 
+list item is indented with 4 whitespaces, all nested items must be indented with a multiple of 4 spaces. For example,
+a list item can't be indented with 3 spaces while another one is indented with 4 spaces.
 
-\begin{itemize}
-\item the above two rules cause the script to exit with an error message pointing to the faulty list. on top of that, in keeping with LaTeX and markdown logic, a list item can't skip a nesting level. this will \textbf{not} stop the script, the indentation will just be reset automatically. 
-\end{itemize}
+The above two rules cause the script to exit with an error message pointing to the faulty list. On top of that,
+in keeping with LaTeX and markdown logic, a list item can't skip a nesting level (you cannot go from an item in a list
+to an item in a list in a list). This will \textbf{not} stop the script, the indentation will just be reset automatically.
 
-\begin{Verbatim}[breaklines=true]
+\begin{Verbatim}[h!,breaklines=true]
 - this is an item at level 0
   - this is an item at level 1; the indentation is set as 2 whitespaces
   - same here; level 1.
@@ -171,25 +369,61 @@ the indentation is processed and what constitutes a valid list for this tool.
    a nesting level
   - this item is at level 1
 \end{Verbatim}
-
-\textbf{technically, how does it work ?}
+\subsection*{Technically, how does it work ?}
+\addcontentsline{toc}{subsection}{Technically, how does it work ?}
 
 \begin{itemize}
-\item the complete markdown list is located
-\item each list item is mapped to its indentation level, in number of leading spaces.
-\item the list is validated. if it is not valid, the script stops.
-\item an indentation multiplier is defined: it is the number of spaces in the first nested list item
-\item this multiplier is used to map each list item to its nesting level
-\item the markdown is syntax is replaced my markdown syntax. 
+\item The complete markdown list is matched.
+\item Each list item is mapped to its indentation level, in number of leading spaces.
+\item The list is validated. If it is not valid, the script stops.
+\item An indentation multiplier is defined: it is the number of spaces in the first nested list item.
+\item This multiplier is used to map each list item to its nesting level.
+\item The markdown is syntax is replaced by TeX syntax. 
 \end{itemize}
+\subsection*{Examples of valid and invalid lists}
+\addcontentsline{toc}{subsection}{Examples of valid and invalid lists}
+\subsubsection*{Valid lists}
+\addcontentsline{toc}{subsubsection}{Valid lists}
+
+\begin{Verbatim}[h!,breaklines=true]
+- item at level 0
+- item at level 0
+  - item at level 1. here, a 2-whitespace indentation is defined for the list.
+   - item at level 2, with 4 leading spaces.
+- item at level 0
+\end{Verbatim}
+
+\begin{Verbatim}[h!,breaklines=true]
+   - item at level 0
+   - item at level 0
+\end{Verbatim}
+
+\begin{Verbatim}[h!,breaklines=true]
+- item at level 0
+   - item at level 1. for this list, the indentation is set to 4 spaces.
+   - visually, this item is at level 3 (12 leading spaces), but will be reindented to 2 spaces.
+   - item at level 1.
+\end{Verbatim}
+\subsubsection*{Invalid lists}
+\addcontentsline{toc}{subsubsection}{Invalid lists}
+
+\begin{Verbatim}[h!,breaklines=true]
+  - item at level 0
+  - item at level 0
+- this will cause the script to exit: the item is less indented than the first item.
+\end{Verbatim}
+
+\begin{Verbatim}[h!,breaklines=true]
+- item at level 0
+	- indentation is set at 4 spaces
+	 - here, there are 6 spaces. the indentation is incoherent and the script stops.
+\end{Verbatim}
 
 \par\noindent\rule{\linewidth}{0.4pt}
-\section*{License}
-\addcontentsline{toc}{section}{License}
+\section*{License and credits}
+\addcontentsline{toc}{section}{License and credits}
 
-released under GNU GPL v3.
-
-md2tex README.md -c -t ./readme/readme\_article\_template.tex -o ./readme/README\_article.tex -d article -u
+Developped by Paul Kervegan in August 2022 and released under GNU GPL v3.
 
 
 % table of contents

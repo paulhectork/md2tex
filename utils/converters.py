@@ -27,7 +27,7 @@ class MDSimple:
         # images and hyperlink
         r"(?<!!)\[(.*?)\]\((.*?)\)": r"\\href{\2}{\1}",  # hyperlink
         r"!\[(.*?)\]\((.*?)\)": r"""
-\\begin{figure}
+\\begin{figure}[h!]
     \\centering
     \\includegraphics[width=\\linewidth]{\2}
     \\caption{\1}
@@ -73,7 +73,7 @@ class MDHeader:
         r"^\s*(\\#){2}(?!\\#?)(.*?)$": r"\\section*{\2}\n\\addcontentsline{toc}{section}{\2}\n",
         r"^\s*(\\#){3}(?!\\#?)(.*?)$": r"\\subsection*{\2}\n\\addcontentsline{toc}{subsection}{\2}\n",
         r"^\s*(\\#){4}(?!\\#?)(.*?)$": r"\\subsubsection*{\2}\n\\addcontentsline{toc}{subsubsection}{\2}\n",
-        r"^\s*(\\#){5,}(?!\\#?)(.*?)$": r"\n\n\\noindent{}\\textbf*{\2}\n\n",
+        r"^\s*(\\#){5,}(?!\\#?)(.*?)$": r"\n\n\\noindent{}\\textbf{\2}\n\n",
     }
     article_numbered = {
         r"^\s*(\\#){1}(?!\\#?)(.*?)$": r"\\section{\2}\n",  # 1st level title
@@ -85,7 +85,7 @@ class MDHeader:
         r"^\s*(\\#){1}(?!\\#?)(.*?)$": r"\\section*{\2}\n\\addcontentsline{toc}{section}{\2}\n",
         r"^\s*(\\#){2}(?!\\#?)(.*?)$": r"\\section*{\2}\n\\addcontentsline{toc}{subsection}{\2}\n",
         r"^\s*(\\#){3}(?!\\#?)(.*?)$": r"\\subsection*{\2}\n\\addcontentsline{toc}{subsubsection}{\2}\n",
-        r"^\s*(\\#){4,}(?!\\#?)(.*?)$": r"\n\n\\noindent{}\\textbf*{\2}\n\n",
+        r"^\s*(\\#){4,}(?!\\#?)(.*?)$": r"\n\n\\noindent{}\\textbf{\2}\n\n",
     }
 
     @staticmethod
@@ -289,7 +289,7 @@ class MDCode:
             # a listing environment to hold the code
             if lang in languages:
                 env = r"""
-\begin{listing}
+\begin{listing}[h!]
     \begin{minted}{@@LANGTOKEN@@}
 @@CODETOKEN@@
     \end{minted}
@@ -302,7 +302,7 @@ class MDCode:
             # in it
             else:
                 env = r"""
-\begin{Verbatim}[breaklines=true]
+\begin{Verbatim}[h!,breaklines=true]
 @@CODETOKEN@@
 \end{Verbatim}
                 """  # env to add the code to
@@ -421,6 +421,7 @@ class MDCleaner:
         string = string.replace(r"{", r"\{")
         string = string.replace(r"}", r"\}")
         string = string.replace("\\", r"\textbackslash{}")
+        string = string.replace(r">", r"\textgreater{}")
         string = string.replace(r"#", r"\#")
         string = string.replace("$", r"\$")
         string = string.replace("%", r"\%")

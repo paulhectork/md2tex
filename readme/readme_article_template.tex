@@ -21,9 +21,10 @@
 \def\Verbatim{\par\setbox0\vbox\bgroup\oldv}
 \def\endVerbatim{\oldendv\egroup\fboxsep0pt \noindent\colorbox[gray]{0.9}{\usebox0}\par}
 
-\usepackage{minted}
+\usepackage[newfloat]{minted}
+\SetupFloatingEnvironment{listing}
 \usemintedstyle{emacs}
-\setminted{linenos, breaklines, tabsize=4, bgcolor=lightgray}
+\setminted{linenos, breaklines, tabsize=4, bgcolor=gray}
 
 \usepackage[margin=2.5cm]{geometry}
 \usepackage{setspace}
@@ -32,15 +33,14 @@
 
 \begin{document}
 % title
-\begin{centering}
-    \vspace{2cm}
-        \begin{large}
-            \textbf{README: \texttt{md2tex}, a customizable python CLI to convert Markdown to TeX}
-        \end{large}
-        \bigskip
-            Licensed under GNU GPL-3.0\\August 2022
-    \vspace{2cm}
-\end{centering}
+\begin{center}
+	\begin{Large}
+        \textbf{README: \texttt{md2tex}, a customizable python CLI \\ to convert Markdown to TeX}
+    \end{Large}
+    \bigskip
+    \\~\\Licensed under GNU GPL-3.0\\August 2022
+	\vspace{1.5cm}
+\end{center}
 
 % body
 @@BODYTOKEN@@

@@ -1,4 +1,4 @@
-\documentclass[a4paper, 12pt, twoside]{article}
+\documentclass[a4paper, 12pt, twoside]{book}
 \usepackage{fontspec}
 \usepackage{babel}
 \usepackage[utf8x]{inputenc}
@@ -23,7 +23,7 @@
 
 \usepackage[newfloat]{minted}
 \SetupFloatingEnvironment{listing}
-\usemintedstyle{manni}
+\usemintedstyle{emacs}
 \setminted{linenos, breaklines, tabsize=4, bgcolor=gray}
 
 \usepackage[margin=2.5cm]{geometry}
@@ -32,27 +32,15 @@
 \onehalfspacing
 
 \begin{document}
-% title
-\begin{center}
-	\begin{Large}
-        \textbf{README: \texttt{md2tex}, a customizable python CLI \\ to convert Markdown to TeX}
-    \end{Large}
-    \bigskip
-    \\~\\Licensed under GNU GPL-3.0\\August 2022
-	\vspace{1.5cm}
-\end{center}
 
-% body
-\section*{\texttt{md2tex} - a CLI to convert Markdown to TeX}
-\addcontentsline{toc}{section}{\texttt{md2tex} - a CLI to convert Markdown to TeX}
+\chapter{\texttt{md2tex} - a CLI to convert Markdown to TeX}
 
 \texttt{md2tex} is a simple but customizable markdown to TeX converter inspired by XSLT and functionnal programming. 
 Rather than using fancy object oriented libraries, it locates elements of Markdown syntax using regular 
 expressions and translates them into TeX syntax. It has only been tested with latin script so far.
 
 \par\noindent\rule{\linewidth}{0.4pt}
-\section*{Features}
-\addcontentsline{toc}{subsection}{Features}
+\section{Features}
 
 \begin{itemize}
 \item Translation from Markdown to TeX
@@ -62,20 +50,17 @@ expressions and translates them into TeX syntax. It has only been tested with la
 \end{itemize}
 
 \par\noindent\rule{\linewidth}{0.4pt}
-\section*{Commands / How to}
-\addcontentsline{toc}{subsection}{Commands / How to}
+\section{Commands / How to}
 
 The advantage of having a script focused on Markdown to TeX conversion is that you can get a lot of fine tuning
 and extra customization.
-\subsection*{Requirements}
-\addcontentsline{toc}{subsubsection}{Requirements}
+\subsection{Requirements}
 
 The script relies on the \href{http://tug.ctan.org/macros/latex/contrib/minted/minted.pdf}{\texttt{minted}} package,
 so this needs to be installed on your machine. This script has been tested on a Linux machine and should
 work on UNIX and affiliated systems. Theoritically, it should also run on Windows, although that has not
 been tested. You will need to tailor the below scripts if you use Windows.
-\subsection*{Automated installation (MacOS/GNU-Linux)}
-\addcontentsline{toc}{subsubsection}{Automated installation (MacOS/GNU-Linux)}
+\subsection{Automated installation (MacOS/GNU-Linux)}
 
 An installation shell script has been written to make things easier.
 Simply clone the repo and launch the install !
@@ -88,8 +73,7 @@ bash install.sh # can also be used with other shells: zsh, ash...
 
    \end{minted}
 \end{listing}
-\subsection*{Manual install}
-\addcontentsline{toc}{subsubsection}{Manual install}
+\subsection{Manual install}
 
 If the above method doesn't work, a manual installation is just as easy:
 
@@ -104,8 +88,7 @@ pip install --editable . # build the package
 
    \end{minted}
 \end{listing}
-\subsection*{Base functionning}
-\addcontentsline{toc}{subsubsection}{Base functionning}
+\subsection{Base functionning}
 
 This CLI should be used from the \texttt{md2tex} directory.
 
@@ -116,18 +99,15 @@ md2tex path/to/markdown/file.md --options
 
    \end{minted}
 \end{listing}
-\subsection*{Arguments and options}
-\addcontentsline{toc}{subsubsection}{Arguments and options}
-
-\noindent{}\textbf{Argument}
+\subsection{Arguments and options}
+\subsubsection{Argument}
 
 The only \textbf{compulsory argument} is the path to the markdown file that needs to be processed.
 
 \begin{itemize}
 \item The file must finish with \texttt{.md} so that we're sure that a markdown file is being processed. 
 \end{itemize}
-
-\noindent{}\textbf{Optional parameters}
+\subsubsection{Optional parameters}
 
 As you can see below, there quite a few possibilities for fine-tuning. All of the below
 parameters are optional.
@@ -151,12 +131,12 @@ parameters are optional.
  \item this argument must be used in conjunction with \texttt{-c} for an actual template to be used.
 \item a path to an existing template must be provided.
 \item this template must contain the string \texttt{@@BODYTOKEN@@}: this token will be replaced by the contents of the 	 converted Markdown file.
-\item the document class can also be defined in the document by the CLI: 	 in the template's preamble, write \texttt{documentclass\textbackslash{}{article\textbackslash{}}}.
+\item the document class can also be defined in the document by the CLI: 	 in the template's preamble, write \texttt{documentclass\textbackslash{}{book\textbackslash{}}}.
 \end{itemize}
 \item \textbf{\texttt{-d}, \texttt{--document-class}}: this argument indicates the class of the final TeX document. it indicates wether to process the Markdown file as a LaTeX \texttt{book} or as an \texttt{article}.
 \begin{itemize} 
  \item defaults to \texttt{article}.
-\item if used with a custom TeX template (see \texttt{-c} and \texttt{-t}), the template must contain an \texttt{article} 	 in the preamble where the document class is specified so that the TeX document class can actually change.
+\item if used with a custom TeX template (see \texttt{-c} and \texttt{-t}), the template must contain an \texttt{book} 	 in the preamble where the document class is specified so that the TeX document class can actually change.
 \item in fact, this argument only impacts the headers used in the TeX template.
 \end{itemize}
 \item \textbf{\texttt{-u}, \texttt{--unnumbered-headers}}: if this argument is provided, the TeX headers (\texttt{\textbackslash{}chaper}, \texttt{section}...) will be unnumbered.
@@ -172,8 +152,7 @@ parameters are optional.
  \item if not provided, then the Markdown footnotes will be rendered as actual \texttt{\textbackslash{}footnote\textbackslash{}{\textbackslash{}}}. 
 \end{itemize}
 \end{itemize}
-\subsection*{Command line help}
-\addcontentsline{toc}{subsubsection}{Command line help}
+\subsection{Command line help}
 
 \begin{listing}[h!]
    \begin{minted}{bash}
@@ -183,8 +162,7 @@ md2tex --help
 \end{listing}
 
 \par\noindent\rule{\linewidth}{0.4pt}
-\section*{Examples}
-\addcontentsline{toc}{subsection}{Examples}
+\section{Examples}
 
 Output TeX files and the PDFs (using \texttt{XeLaTeX}) can be seen in the \texttt{readme/} and \texttt{examples/} directory.
 
@@ -257,10 +235,8 @@ md2tex README.md -c -o ./examples/README_book_default_template.tex -d book
 \end{listing}
 
 \par\noindent\rule{\linewidth}{0.4pt}
-\section*{Markdown syntax}
-\addcontentsline{toc}{subsection}{Markdown syntax}
-\subsection*{Currently supported}
-\addcontentsline{toc}{subsubsection}{Currently supported}
+\section{Markdown syntax}
+\subsection{Currently supported}
 
 \begin{itemize}
 \item Line breaks: paragraph changes using \texttt{\textbackslash{}n\textbackslash{}n}, \texttt{<br\textgreater{}} and \texttt{<br/\textgreater{}}
@@ -282,8 +258,7 @@ md2tex README.md -c -o ./examples/README_book_default_template.tex -d book
 \item Inline quotes : french and english style, nested quotes.
 \item Footnotes. \textbf{Warning}: loose footnotes (references in the body that point to nothing or footnotes that point to nothing in the body) will be deleted. 
 \end{itemize}
-\subsection*{Currently unsupported}
-\addcontentsline{toc}{subsubsection}{Currently unsupported}
+\subsection{Currently unsupported}
 
 \begin{itemize}
 \item Markdown tables
@@ -295,8 +270,7 @@ md2tex README.md -c -o ./examples/README_book_default_template.tex -d book
 \end{itemize}
 
 \par\noindent\rule{\linewidth}{0.4pt}
-\section*{Things that will mess with the output}
-\addcontentsline{toc}{subsection}{Things that will mess with the output}
+\section{Things that will mess with the output}
 
 The things in the list below will either cause the script to exit or produce a messy output.
 
@@ -315,13 +289,11 @@ Clean your file first ! You can also make the bulk of the translation using this
 file later on.
 
 \par\noindent\rule{\linewidth}{0.4pt}
-\section*{About nested lists and visual indentation}
-\addcontentsline{toc}{subsection}{About nested lists and visual indentation}
+\section{About nested lists and visual indentation}
 
 List nesting and visual indentation is a bit of a pickle, so here's an explanation of how
 the indentation is processed and what constitutes a valid list for this tool.
-\subsection*{What is a valid list?}
-\addcontentsline{toc}{subsubsection}{What is a valid list?}
+\subsection{What is a valid list?}
 
 All items must be \textbf{as indented than the first list item} or more. the indentation level of the first item
 will be removed before processing that list. This means that \textit{the first example} will result in the same
@@ -354,8 +326,7 @@ to an item in a list in a list). This will \textbf{not} stop the script, the ind
    a nesting level
   - this item is at level 1
 \end{Verbatim}
-\subsection*{Technically, how does it work ?}
-\addcontentsline{toc}{subsubsection}{Technically, how does it work ?}
+\subsection{Technically, how does it work ?}
 
 \begin{itemize}
 \item The complete markdown list is matched.
@@ -365,10 +336,8 @@ to an item in a list in a list). This will \textbf{not} stop the script, the ind
 \item This multiplier is used to map each list item to its nesting level.
 \item The markdown is syntax is replaced by TeX syntax. 
 \end{itemize}
-\subsection*{Examples of valid and invalid lists}
-\addcontentsline{toc}{subsubsection}{Examples of valid and invalid lists}
-
-\noindent{}\textbf{Valid lists}
+\subsection{Examples of valid and invalid lists}
+\subsubsection{Valid lists}
 
 \begin{Verbatim}[h!,breaklines=true]
 - item at level 0
@@ -389,8 +358,7 @@ to an item in a list in a list). This will \textbf{not} stop the script, the ind
    - visually, this item is at level 3 (12 leading spaces), but will be reindented to 2 spaces.
    - item at level 1.
 \end{Verbatim}
-
-\noindent{}\textbf{Invalid lists}
+\subsubsection{Invalid lists}
 
 \begin{Verbatim}[h!,breaklines=true]
   - item at level 0
@@ -405,13 +373,11 @@ to an item in a list in a list). This will \textbf{not} stop the script, the ind
 \end{Verbatim}
 
 \par\noindent\rule{\linewidth}{0.4pt}
-\section*{License and credits}
-\addcontentsline{toc}{subsection}{License and credits}
+\section{License and credits}
 
 Developped by Paul Kervegan in August 2022 and released under GNU GPL v3.
 
 
-% table of contents
 \clearpage
 \tableofcontents
 \end{document}
